@@ -1,0 +1,22 @@
+ubuntu20.04 Cartographer ROS小白简单安装使用
+https://blog.csdn.net/m0_46482248/article/details/126745758
+
+a
+
+cartographer 编译安装
+catkin_make_isolated --install --use-ninja
+source devel_isolated/setup.bash 
+
+
+2D数据测试:
+wget -P ~/Downloads https://storage.googleapis.com/cartographer-public-data/bags/backpack_2d/cartographer_paper_deutsches_museum.bag  
+roslaunch cartographer_ros demo_backpack_2d.launch bag_filename:=/home/arc/works/Graduation_project/cartographer/cartographer_paper_deutsches_museum.bag
+
+
+# 先停止建图：
+rosservice call /finish_trajectory 0
+# 然后保存成pbstream，自己更改保存路径，注意不能写相对路径，测试过不行
+rosservice call /write_state "{filename: '${HOME}/Downloads/mymap.pbstream'}"
+#导出成一般导航使用的yaml+pgm
+rosrun cartographer_ros cartographer_pbstream_to_ros_map -map_filestem=${HOME}/Downloads/mymap -pbstream_filename=${HOME}/Downloads/mymap.pbstream -resolution=0.05
+

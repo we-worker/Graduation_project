@@ -1,0 +1,41 @@
+
+<robot name="ranger">
+  <material name="orange">
+    <color rgba="1.0 0.5 0.2 1" />
+  </material>
+  <material name="gray">
+    <color rgba="0.2 0.2 0.2 1" />
+  </material>
+ 
+
+  <link name="scanner_link">#与雷达的fram_id对应
+    <visual>
+      <origin xyz="0 0 0" />
+      <geometry>
+        <cylinder length="0.05" radius="0.03" />
+      </geometry>
+      <material name="gray" />
+    </visual>
+  </link>
+   <link name="base_link">#与imu的fram_id对应
+    <visual>
+      <origin xyz="0 0 0" />
+      <geometry>
+        <box size="0.06 0.04 0.02" />
+      </geometry>
+      <material name="orange" />
+    </visual>
+  </link>
+ 
+  <joint name="imu2laser" type="fixed">
+    <parent link="scanner_link" />
+    <child link="base_link" />
+    <origin xyz="-0.3 0 0" rpy="0 0 -1.5708"/>
+  </joint>
+   <!-- <joint name="imu2laser" type="fixed">
+    <parent link="base_link" />
+    <child link="scanner_link" />
+    <origin xyz="0.3 0 0" rpy="0 0 1.5708" />
+  </joint> -->
+</robot>
+
