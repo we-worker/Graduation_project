@@ -17,7 +17,7 @@
  
   <node name="cartographer_node" pkg="cartographer_ros"
       type="cartographer_node" args="
-          -configuration_directory $(find cartographer_ros)/configuration_files
+          -configuration_directory $(find mycarto)/configuration_files
           -configuration_basename dyp_revo_lds.lua"
       output="screen">
     <remap from="scan" to="scan" />
@@ -26,11 +26,11 @@
  
   <node name="cartographer_occupancy_grid_node" pkg="cartographer_ros"
       type="cartographer_occupancy_grid_node" args="-resolution 0.05" />
-  <param name="robot_description" textfile="$(find cartographer_ros)/urdf/dyp_backpack_2d.urdf" />
+  <param name="robot_description" textfile="$(find mycarto)/urdf/dyp_backpack_2d.urdf" />
   <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
  
  
   <node name="rviz" pkg="rviz" type="rviz" required="true"
-      args="-d $(find cartographer_ros)/configuration_files/demo_2d.rviz" />
+      args="-d $(find mycarto)/configuration_files/demo_2d.rviz" />
  
 </launch>

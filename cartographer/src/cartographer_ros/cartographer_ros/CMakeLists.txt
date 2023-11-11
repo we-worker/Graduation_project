@@ -169,7 +169,7 @@ if (CATKIN_ENABLE_TESTING)
   endforeach()
 endif()
 
-install(DIRECTORY launch urdf configuration_files meshes
+install(DIRECTORY launch urdf configuration_files
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
 

@@ -143,6 +143,5 @@ octave-workspace
 **/logs
 
 ugv_gazebo_sim
-ugv_gazebo_sim/**
-/ugv_gazebo_sim
 **/meshes
+IMU/src/handsfree_ros_imu/tutorials

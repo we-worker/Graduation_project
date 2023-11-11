@@ -6,14 +6,14 @@
 
 
   <param name="robot_description"
-    textfile="$(find cartographer_ros)/urdf/dyp_backpack_2d.urdf" />
+    textfile="$(find mycarto)/urdf/ranger_mini_v2.urdf" />
 
   <node name="robot_state_publisher" pkg="robot_state_publisher"
     type="robot_state_publisher" />
 
   <node name="cartographer_node" pkg="cartographer_ros"
       type="cartographer_node" args="
-          -configuration_directory $(find cartographer_ros)/configuration_files
+          -configuration_directory $(find mycarto)/configuration_files
           -configuration_basename backpack_2d_localization.lua
           -load_state_filename $(arg load_state_filename)"
       output="screen">
@@ -26,5 +26,5 @@
   <node name="map_server" pkg="map_server" type="map_server" args="/home/arc/Downloads/902/902.yaml"/>
 
   <node name="rviz" pkg="rviz" type="rviz" required="true"
-      args="-d $(find cartographer_ros)/configuration_files/demo_2d.rviz" />
+      args="-d $(find mycarto)/configuration_files/demo_2d.rviz" />
 </launch>

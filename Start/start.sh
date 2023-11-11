@@ -19,3 +19,14 @@ gnome-terminal -t "carto" -- bash -c "source /home/arc/works/Graduation_project/
 # gnome-terminal --tab -e 'bash -c "source /home/arc/works/Graduation_project/pf_laser/devel/setup.bash && roslaunch pf_driver r2000.launch; exec bash"' \
 # --tab -e 'bash -c "roslaunch handsfree_ros_imu handsfree_imu.launch; exec bash"'
 
+# x-terminal-emulator -e "source /home/arc/works/Graduation_project/IMU/devel/setup.sh && roslaunch handsfree_ros_imu handsfree_imu.launch;bash" -e "source /home/arc/works/Graduation_project/cartographer/devel_isolated/setup.bash;bash"
+
+1.
+source /home/arc/works/Graduation_project/pf_laser/devel/setup.bash && roslaunch pf_driver r2000.launch
+
+2.
+source /home/arc/works/Graduation_project/IMU/devel/setup.sh && roslaunch handsfree_ros_imu handsfree_imu.launch
+
+3.
+sudo -S modprobe gs_usb
+source /home/arc/works/Graduation_project/ranger_ros/devel/setup.bash && rosrun ranger_bringup bringup_can2usb.bash && roslaunch ranger_bringup ranger_mini_v2.launch
