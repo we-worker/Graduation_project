@@ -16,8 +16,18 @@
 - 定位：使用cartographer的纯定位（imu+laser）
 - 导航：使用navigation+teb_local_planner
 
+## 节点图
+
+![node图片](./Doc/ros_node_graph.png)
+
+![tf图片](./Doc/ros_tf_graph.png)
+
 ## 更新日志
 
 - 初步大框架
 - ranger_mini_urdf修正完成
 - 修改imu为imu_link，机器人为base_link。成功部署carlike
+
+## TODO
+- movebase节点添加imu数据
+- 修复全向移动时线速度和角速度同时有数据导致轮胎乱动的问题

@@ -1,0 +1,15 @@
+local_costmap:
+ global_frame: map  # 全局坐标系
+ robot_base_frame: base_link  # 机器人的基座坐标系
+ update_frequency: 5.0  # 更新频率
+ publish_frequency: 2.0  # 发布频率
+ static_map: false  # 静态地图
+ rolling_window: true  # 滚动窗口
+ width: 5  # 局部地图宽度 单位是 m
+ height: 5  # 局部地图宽度 单位是 m
+ resolution: 0.1  # 分辨率
+ transform_tolerance: 0.5  # 坐标转换容差
+ 
+ plugins:
+  - {name: static_layer,        type: "costmap_2d::StaticLayer"}  # 静态层
+  - {name: obstacle_layer,      type: "costmap_2d::ObstacleLayer"}  # 障碍物层

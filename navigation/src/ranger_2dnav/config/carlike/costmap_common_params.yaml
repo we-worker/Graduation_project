@@ -17,7 +17,7 @@ obstacle_layer:
   combination_method: 1
   observation_sources: scan imu
   laser_scan_sensor: {sensor_frame: scanner_link,data_type: LaserScan, topic: scan, marking: true, clearing: true}
-  imu_sensor: {sensor_frame: imu_link, data_type: Imu, topic: imu/data, marking: true, clearing: false}
+  imu_sensor: {sensor_frame: imu_link, data_type: Imu, topic: imu, marking: true, clearing: false}
 
 inflation_layer:
   # Parameters for the inflation layer of the costmap

@@ -1,0 +1,33 @@
+
+#---standard pioneer footprint---
+#---(in meters)---
+# robot_radius: 0.17
+footprint: [[-0.5, -0.5], [-0.5, 0.5], [0.5, 0.5], [0.5, -0.5]] #其他形状的四个角的坐标XY坐标
+
+transform_tolerance: 0.2 # 转换容差：允许的坐标转换误差
+
+map_type: costmap # 地图类型：成本地图
+
+# 障碍物层
+obstacle_layer:
+  enabled: true  # 启用障碍物层
+  obstacle_range: 3.0  # 障碍物的范围（单位：米）
+  raytrace_range: 4.0  #  ray跟踪范围（单位：米）
+  inflation_radius: 0.2  # inflation半径（单位：米）
+  track_unknown_space: true  # 跟踪未知空间
+  combination_method: 1  # 组合方法
+
+  observation_sources: scan imu # 观察来源
+  laser_scan_sensor: {sensor_frame: scanner_link,data_type: LaserScan, topic: scan, marking: true, clearing: true}
+  imu_sensor: {sensor_frame: imu_link, data_type: Imu, topic: imu/data, marking: true, clearing: false}
+
+# 膨胀层
+inflation_layer:
+  enabled:              true # 启用膨胀层
+  cost_scaling_factor:  10.0  # 障碍物cost随着时间的减少（默认：10）
+  inflation_radius:     0.5  # 从障碍物距离最大距离，对计划路径的代价进行考虑。
+
+static_layer:
+  enabled:              true # 启用静态层
+  map_topic:            "/map" # 地图主题
+ 
