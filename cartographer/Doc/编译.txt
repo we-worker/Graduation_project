@@ -20,7 +20,7 @@ roslaunch cartographer_ros demo_backpack_2d_localization.launch    load_state_fi
 
 
 
-      <node name="playbag" pkg="rosbag" type="play"  args="--clock $(arg bag_filename)" />
+<node name="playbag" pkg="rosbag" type="play"  args="--clock $(arg bag_filename)" />
 
 
 报错原因总结：
