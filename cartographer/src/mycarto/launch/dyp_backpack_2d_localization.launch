@@ -1,8 +1,6 @@
 <launch>
   <param name="/use_sim_time" value="false" />
 
-  <!-- <node pkg="tf" type="static_transform_publisher" name="base_link_to_laser"
-    args="0.14 0.0 0.0 0.0 0.0 0.0 /robot_link /scanner_link 40" /> -->
 
 
   <param name="robot_description"
@@ -23,8 +21,13 @@
 
   <!-- <node name="cartographer_occupancy_grid_node" pkg="cartographer_ros"
       type="cartographer_occupancy_grid_node" args="-resolution 0.05" /> -->
-  <node name="map_server" pkg="map_server" type="map_server" args="/home/arc/Downloads/902/902.yaml"/>
+  <!-- <node name="map_server" pkg="map_server" type="map_server" args="/home/arc/Downloads/902/902.yaml"/> -->
 
   <node name="rviz" pkg="rviz" type="rviz" required="true"
       args="-d $(find mycarto)/configuration_files/demo_2d.rviz" />
+
+  <node pkg="tf" type="static_transform_publisher" name="robot_to_laser"
+    args="0.05 0 0.0 0.0 0.0 0.0  /imu_link /base_link 200" />
+
+
 </launch>

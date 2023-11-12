@@ -1,0 +1,31 @@
+
+#---standard pioneer footprint---
+#---(in meters)---
+# This YAML file contains the common parameters for the costmap used in the carlike navigation of the Ranger robot. It defines the footprint of the robot, the transform tolerance, the map type, and the parameters for the obstacle, inflation, and static layers of the costmap.
+footprint: [[-0.5, -0.5], [-0.5, 0.5], [0.5, 0.5], [0.5, -0.5]] #其他形状的四个角的坐标XY坐标
+
+transform_tolerance: 0.2
+map_type: costmap
+
+obstacle_layer:
+  # Parameters for the obstacle layer of the costmap
+  enabled: true
+  obstacle_range: 3.0
+  raytrace_range: 3.5
+  inflation_radius: 0.2
+  track_unknown_space: false
+  combination_method: 1
+  observation_sources: scan imu
+  laser_scan_sensor: {sensor_frame: scanner_link,data_type: LaserScan, topic: scan, marking: true, clearing: true}
+  imu_sensor: {sensor_frame: imu_link, data_type: Imu, topic: imu/data, marking: true, clearing: false}
+
+inflation_layer:
+  # Parameters for the inflation layer of the costmap
+  enabled: true
+  cost_scaling_factor: 10.0  # exponential rate at which the obstacle cost drops off (default: 10)
+  inflation_radius: 0.5  # max. distance from an obstacle at which costs are incurred for planning paths.
+
+static_layer:
+  # Parameters for the static layer of the costmap
+  enabled: true
+  map_topic: "/map"

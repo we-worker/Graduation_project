@@ -80,7 +80,7 @@ def handleSerialData(raw_data):
         stamp = rospy.get_rostime()
 
         imu_msg.header.stamp = stamp
-        imu_msg.header.frame_id = "base_link"
+        imu_msg.header.frame_id = "imu_link"
 
 
         angle_radian = [angle_degree[i] * math.pi / 180 for i in range(3)]

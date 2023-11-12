@@ -6,13 +6,13 @@
 <robot name="ranger_mini_v2">
   <!-- Base -->
   <link name="base_footprint"/>
-  <joint name="robot_base_joint" type="fixed">
-    <origin xyz="0 0 0.32"/>
-    <parent link="base_footprint"/>
-    <child link="robot_base"/>
+  <joint name="base_link_joint" type="fixed">
+    <origin xyz="0 0 -0.32"/>
+    <parent link="base_link"/>
+    <child link="base_footprint"/>
   </joint>
   <!-- Base link -->
-  <link name="robot_base">
+  <link name="base_link">
     <inertial>
       <origin xyz="0.0 0.0 0.0"/>
       <mass value="10"/>
@@ -61,7 +61,7 @@
   </link>
   <joint name="fl_steering_wheel" type="revolute">
     <origin rpy="0 0 0" xyz="0.23 0.206 -0.1"/>
-    <parent link="robot_base"/>
+    <parent link="base_link"/>
     <child link="fl_steering_wheel_link"/>
     <axis rpy="0 0 0" xyz="0 0 1"/>
     <limit effort="5" lower="-2.1" upper="2.1" velocity="6.28"/>
@@ -117,7 +117,7 @@
   </link>
   <joint name="fr_steering_wheel" type="revolute">
     <origin rpy="0 0 0" xyz="0.23 -0.206 -0.1"/>
-    <parent link="robot_base"/>
+    <parent link="base_link"/>
     <child link="fr_steering_wheel_link"/>
     <axis rpy="0 0 0" xyz="0 0 1"/>
     <limit effort="5" lower="-2.1" upper="2.1" velocity="6.28"/>
@@ -173,7 +173,7 @@
   </link>
   <joint name="rl_steering_wheel" type="revolute">
     <origin rpy="0 0 0" xyz="-0.23 0.206 -0.1"/>
-    <parent link="robot_base"/>
+    <parent link="base_link"/>
     <child link="rl_steering_wheel_link"/>
     <axis rpy="0 0 0" xyz="0 0 1"/>
     <limit effort="5" lower="-2.1" upper="2.1" velocity="6.28"/>
@@ -229,7 +229,7 @@
   </link>
   <joint name="rr_steering_wheel" type="revolute">
     <origin rpy="0 0 0" xyz="-0.23 -0.206 -0.1"/>
-    <parent link="robot_base"/>
+    <parent link="base_link"/>
     <child link="rr_steering_wheel_link"/>
     <axis rpy="0 0 0" xyz="0 0 1"/>
     <limit effort="5" lower="-2.1" upper="2.1" velocity="6.28"/>
@@ -284,7 +284,7 @@
       <material name="gray" />
     </visual>
   </link>
-   <link name="base_link">#与imu的fram_id对应
+   <link name="imu_link">#与imu的fram_id对应
     <visual>
       <origin xyz="0 0 0" />
       <geometry>
@@ -295,17 +295,22 @@
   </link>
  
   <joint name="laser2robot" type="fixed">
-    <parent link="base_footprint" />
+    <parent link="base_link" />
     <child link="scanner_link" />
-    <origin xyz="0.3 0 0.32" rpy="0 0 1.5708"/>
+    <origin xyz="0.3 0 0" rpy="0 0 1.5708"/>
   </joint>
 
+    <!-- <joint name="imu2robot" type="fixed">
+    <parent link="base_link" />
+    <child link="imu_link" />
+    <origin xyz="-0.3 0 0" rpy="0 0 0"/>
+  </joint> -->
 
     <joint name="imu2laser" type="fixed">
     <parent link="scanner_link" />
-    <child link="base_link" />
-    <origin xyz="0.3 0 0" rpy="0 0 -1.5708"/>
-  </joint>
+    <child link="imu_link" />
+    <origin xyz="0 0.35 0" rpy="0 0 -1.5708"/>
+  </joint> 
 
 
 

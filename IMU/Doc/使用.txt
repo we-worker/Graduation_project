@@ -2,6 +2,8 @@
 https://docs.taobotics.com/docs/hfi-imu/hfi-imu/03_%E5%9F%BA%E7%A1%80%E6%95%99%E7%A8%8B/02_Python%E9%A9%B1%E5%8A%A8%E6%B5%8B%E8%AF%95/doc.html
 
 
+我已经改成了imu_link
+
 1.先不要插 IMU 的 USB ，在终端输入 ls /dev/ttyUSB* 来检测一下，
 然后在将 USB 插入电脑，再在终端输入 ls /dev/ttyUSB* 来检测一下，多出来的 ttyUSB 设备就是 IMU 的串口。
 

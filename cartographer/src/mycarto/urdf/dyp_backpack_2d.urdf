@@ -17,7 +17,7 @@
       <material name="gray" />
     </visual>
   </link>
-   <link name="base_link">#与imu的fram_id对应
+   <link name="imu_link">#与imu的fram_id对应
     <visual>
       <origin xyz="0 0 0" />
       <geometry>
@@ -29,11 +29,11 @@
  
   <joint name="imu2laser" type="fixed">
     <parent link="scanner_link" />
-    <child link="base_link" />
+    <child link="imu_link" />
     <origin xyz="-0.3 0 0" rpy="0 0 -1.5708"/>
   </joint>
    <!-- <joint name="imu2laser" type="fixed">
-    <parent link="base_link" />
+    <parent link="imu_link" />
     <child link="scanner_link" />
     <origin xyz="0.3 0 0" rpy="0 0 1.5708" />
   </joint> -->
