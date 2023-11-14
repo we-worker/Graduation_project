@@ -1,6 +1,6 @@
 [submodule "navigation/src/navigation"]
 	path = navigation/src/navigation
-	url = https://github.com/ros-planning/navigation
+	url = https://gh-proxy.com/https://github.com/ros-planning/navigation
 [submodule "navigation/src/teb_local_planner"]
 	path = navigation/src/teb_local_planner
 	url = https://github.com/rst-tu-dortmund/teb_local_planner
