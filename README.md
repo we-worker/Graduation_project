@@ -31,3 +31,31 @@
 ## TODO
 - movebase节点添加imu数据
 - 修复全向移动时线速度和角速度同时有数据导致轮胎乱动的问题
+- 使用MPC控制
+
+
+
+
+
+## 安装步骤
+
+安装ros1  使用鱼香ros一键安装  （jetson nano 使用ubuntu 18.04 melodic(ROS1)）
+一键安装:rosdep(小鱼的rosdepc,又快又好用)
+一键安装:VsCode开发工具
+一键配置:python国内源
+1. wget http://fishros.com/install -O fishros && . fishros
+
+2.安装git
+sudo apt-get install git
+
+3.下载github仓库代码
+git clone https://github.com/we-worker/Graduation_project.git
+4.下载子git文件
+cd Graduation_project
+git submodule update --init  --recursive
+
+4.编译IMU
+cd Graduation_project/IMU
+catkin_make
+
+5.

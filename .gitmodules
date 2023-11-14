@@ -1,0 +1,15 @@
+[submodule "navigation/src/navigation"]
+	path = navigation/src/navigation
+	url = https://github.com/ros-planning/navigation
+[submodule "navigation/src/teb_local_planner"]
+	path = navigation/src/teb_local_planner
+	url = https://github.com/rst-tu-dortmund/teb_local_planner
+[submodule "pf_laser/src/pf_lidar_ros_driver"]
+	path = pf_laser/src/pf_lidar_ros_driver
+	url = https://github.com/PepperlFuchs/pf_lidar_ros_driver
+[submodule "ranger_ros/src/ranger_ros"]
+	path = ranger_ros/src/ranger_ros
+	url = https://github.com/agilexrobotics/ranger_ros
+[submodule "ranger_ros/src/ugv_sdk"]
+	path = ranger_ros/src/ugv_sdk
+	url = https://github.com/agilexrobotics/ugv_sdk.git
