@@ -145,3 +145,4 @@ octave-workspace
 ugv_gazebo_sim
 **/meshes/**.dae
 IMU/src/handsfree_ros_imu/tutorials
+Map_bag_database/902/902.bag

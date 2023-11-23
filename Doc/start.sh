@@ -39,7 +39,7 @@ rosrun teleop_twist_keyboard teleop_twist_keyboard.py cmd_vel:=/cmd_vel
 
 
 4.启动cartographer纯定位
-source /home/arc/works/Graduation_project/cartographer/devel_isolated/setup.bash && roslaunch mycarto dyp_backpack_2d_localization.launch  load_state_filename:=${HOME}/Downloads/902/902.pbstream
+cd /home/arc/works/Graduation_project && source /home/arc/works/Graduation_project/cartographer/devel_isolated/setup.bash && roslaunch mycarto dyp_backpack_2d_localization.launch  load_state_filename:=./Map_bag_database/902/902.pbstream
 
 5.启动导航控制
 source /home/arc/works/Graduation_project/navigation/devel/setup.bash && roslaunch ranger_2dnav dyp_carlike.launch 
