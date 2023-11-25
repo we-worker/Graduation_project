@@ -241,4 +241,4 @@ class Ui_MainWindow(object):
         self.pushButton_8.setText(_translate("MainWindow", "停止"))
         self.pushButton_9.setText(_translate("MainWindow", "前"))
         self.pushButton_10.setText(_translate("MainWindow", "右"))
-from graphicsview import GraphicsView
+from UI.graphicsview import GraphicsView

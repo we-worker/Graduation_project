@@ -11,8 +11,8 @@ from PyQt5.QtGui import QIcon,QFont,QTextCursor,QPainter, QPixmap, QWheelEvent
 
 from qt_material import apply_stylesheet, QtStyleTools, density
 
-from tcp_logic import TcpLogic
-from main_ui import Ui_MainWindow  
+from Sockets.tcp_logic import TcpLogic
+from UI.main_ui import Ui_MainWindow  
 
 
 
@@ -66,7 +66,7 @@ class RuntimeStylesheets(QMainWindow, QtStyleTools):
 
     def display_image(self):
         # 1. 加载图片到 QPixmap 对象
-        pixmap = QPixmap('902.pgm')
+        pixmap = QPixmap('Datas\902.pgm')
         # 2. 创建一个 QGraphicsPixmapItem 对象，使用 QPixmap 对象作为参数
         pixmap_item = QGraphicsPixmapItem(pixmap)
         # 3. 创建一个 QGraphicsScene 对象
