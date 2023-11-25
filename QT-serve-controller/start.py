@@ -34,6 +34,8 @@ def run_command(cmd_id,client_socket=None):
             break
         if output:
             print(f'{cmd_id}: {output.decode().strip()}')
+        if client_socket!=None:
+            client_socket.sendall(f'DEBUG {cmd_id}: {output.decode().strip()}')
     process.poll()
     if client_socket!=None:
         client_socket.sendall(f'OK START {cmd_id}'.encode())

@@ -42,5 +42,8 @@ def server_program():
         print(f'Connection from: {address}')
         threading.Thread(target=handle_client, args=(client_socket,)).start()
 
+def debug_msg(client,msg):
+    client.sendall(f'DEBUG {msg}'.encode())
+
 if __name__ == '__main__':
     server_program()
