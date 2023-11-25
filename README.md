@@ -7,7 +7,7 @@
 - 底盘：ranger_mini-v2
 - 激光雷达：pf的R2000
 - IMU：taobotics的A9
-- 主控：jeston nano 8GB
+- 主控：jeston nano 4GB
 - 其他：明纬50V转24V电源、明纬50V转5V电源
 
 ## 技术栈
