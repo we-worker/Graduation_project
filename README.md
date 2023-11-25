@@ -124,4 +124,4 @@
     sudo apt-get install terminator
     ```
 
-11. **启动方法**见Doc目录，start.sh文件
+11. **启动方法**见Doc目录，start.sh文件,start.py文件，注意请关闭sudo 密码
