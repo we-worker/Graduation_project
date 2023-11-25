@@ -15,6 +15,7 @@
 - 建图：使用cartographer（imu+laser）
 - 定位：使用cartographer的纯定位（imu+laser）
 - 导航：使用navigation+teb_local_planner
+- 上位机：QT+socket
 
 ## 节点图
 
@@ -22,11 +23,16 @@
 
 ![tf图片](./Doc/ros_tf_graph.png)
 
+## 上位机
+
+![上位机图片](./QT-host-controller/Doc/效果展示.png)
+
 ## 更新日志
 
 - 初步大框架
 - ranger_mini_urdf修正完成
 - 修改imu为imu_link，机器人为base_link。成功部署carlike
+- 搭建上位机大框架
 
 ## TODO
 - movebase节点添加imu数据
