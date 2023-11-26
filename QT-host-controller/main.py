@@ -6,14 +6,13 @@ from multiprocessing import freeze_support
 
 from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog, QGraphicsItem, QGraphicsPixmapItem,QGraphicsScene, QGraphicsView
 from PyQt5.QtCore import QTimer, Qt, QCoreApplication, QRect, QRectF, QSize
-from PyQt5 import uic, QtWebEngineWidgets
 from PyQt5.QtGui import QIcon,QFont,QTextCursor,QPainter, QPixmap, QWheelEvent
 
 from qt_material import apply_stylesheet, QtStyleTools, density
 
 from Sockets.tcp_logic import TcpLogic
 from UI.main_ui import Ui_MainWindow  
-
+import Sockets.message 
 
 
 
@@ -43,7 +42,7 @@ class RuntimeStylesheets(QMainWindow, QtStyleTools):
         """
         功能函数，向debug区写入数据的方法
         """
-        self.main.Debug_Text.insertPlainText(msg)
+        self.main.Debug_Text.insertPlainText(msg+"\n")
         # 滚动条移动到结尾
         self.main.Debug_Text.moveCursor(QTextCursor.End)
 
@@ -66,7 +65,7 @@ class RuntimeStylesheets(QMainWindow, QtStyleTools):
 
     def display_image(self):
         # 1. 加载图片到 QPixmap 对象
-        pixmap = QPixmap('Datas\902.pgm')
+        pixmap = QPixmap('Datas/902.pgm')
         # 2. 创建一个 QGraphicsPixmapItem 对象，使用 QPixmap 对象作为参数
         pixmap_item = QGraphicsPixmapItem(pixmap)
         # 3. 创建一个 QGraphicsScene 对象
@@ -79,7 +78,8 @@ class RuntimeStylesheets(QMainWindow, QtStyleTools):
     def set_target_clicked(self):
         self.main.graphicsView._setTargetPoseMode=True
     def start_all_clicked(self):
-        pass
+        self.client.tcp_send("START ALL")  # send message
+
 
 
            
@@ -97,6 +97,8 @@ extra = {
     'font_size': '13px',
 }
 
+# message_handler = None
+
 if __name__ == "__main__":
     theme = 'light_cyan_500'
     apply_stylesheet(
@@ -107,5 +109,6 @@ if __name__ == "__main__":
     )
 
     frame = RuntimeStylesheets()
+    Sockets.message.message_handler = Sockets.message.MessageHandler(frame)
     frame.show()
     app.exec_()

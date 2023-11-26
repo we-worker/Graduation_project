@@ -3,6 +3,7 @@ import threading
 import time
 import ctypes
 import inspect
+import Sockets.message
 
 # 强制关闭线程的方法
 from stopThreading import stop_thread
@@ -25,7 +26,9 @@ class TcpLogic():
             print('请检查端口号\n')
         else:
             self.tcp_socket.listen()
-            self.sever_th = threading.Thread(target=self.tcp_server_concurrency)
+            # self.sever_th = threading.Thread(target=self.tcp_server_concurrency)
+            self.sever_th = threading.Thread(target=tcp_server_concurrency, args=(self,))
+
             self.sever_th.start()
             print('TCP服务端正在监听端口:%s\n' % str(port))
 
@@ -67,21 +70,22 @@ class TcpLogic():
                 print('无法连接目标服务器\n')
                 self.link=False
             else:
-                self.client_th = threading.Thread(target=self.tcp_client_concurrency, args=(address,))
+                # self.client_th = threading.Thread(target=self.tcp_client_concurrency, args=(address,))
+                self.client_th = threading.Thread(target=Sockets.message.tcp_client_concurrency, args=(self.tcp_socket, self.client_socket_list))
                 self.client_th.start()
                 print('TCP客户端已连接IP:%s端口:%s\n' % address)
                 self.link=True
 
-    def tcp_client_concurrency(self, address):
-        while True:
-            recv_msg = self.tcp_socket.recv(1024)
-            if recv_msg:
-                msg = recv_msg.decode('utf-8')
-                print('来自IP:{}端口:{}:\n{}\n'.format(address[0], address[1], msg))
-            else:
-                self.tcp_socket.close()
-                print('从服务器断开连接\n')
-                break
+    # def tcp_client_concurrency(self, address):
+    #     while True:
+    #         recv_msg = self.tcp_socket.recv(1024)
+    #         if recv_msg:
+    #             msg = recv_msg.decode('utf-8')
+    #             print('来自IP:{}端口:{}:\n{}\n'.format(address[0], address[1], msg))
+    #         else:
+    #             self.tcp_socket.close()
+    #             print('从服务器断开连接\n')
+    #             break
 
     def tcp_send(self, send_msg):
         if self.link is False:
