@@ -1,9 +1,9 @@
 [submodule "navigation/src/navigation"]
 	path = navigation/src/navigation
 	url = https://gh-proxy.com/https://github.com/ros-planning/navigation
-[submodule "navigation/src/teb_local_planner"]
-	path = navigation/src/teb_local_planner
-	url = https://github.com/rst-tu-dortmund/teb_local_planner
+# [submodule "navigation/src/teb_local_planner"]
+# 	path = navigation/src/teb_local_planner
+# 	url = https://github.com/rst-tu-dortmund/teb_local_planner
 [submodule "pf_laser/src/pf_lidar_ros_driver"]
 	path = pf_laser/src/pf_lidar_ros_driver
 	url = https://github.com/PepperlFuchs/pf_lidar_ros_driver
