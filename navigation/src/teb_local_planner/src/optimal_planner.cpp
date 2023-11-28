@@ -352,7 +352,7 @@ bool TebOptimalPlanner::buildGraph(double weight_multiplier)
 
   AddEdgesShortestPath(); // 添加最短路径约束
   
-  
+
   if (cfg_->robot.min_turning_radius == 0 || cfg_->optim.weight_kinematics_turning_radius == 0){
     AddEdgesKinematicsDiffDrive(); // 添加差分驱动机器人的运动学约束
   }

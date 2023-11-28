@@ -138,7 +138,41 @@ EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
 
 
-  // 添加新的约束：线速度和角速度不能同时存在
-  if ((vx != 0 || vy != 0) && omega != 0) {
-    omega = 0;  // 将角速度设置为0
+
+    void computeError()
+    {
+
+      // 正向驱动约束
+      Eigen::Vector2d angle_vec ( cos(conf1->theta()), sin(conf1->theta()) );	   
+      _error[1] = penaltyBoundFromBelow(deltaS.dot(angle_vec), 0,0);
+      // epsilon=0, 否则会将第一个带点推离起点
+
+      // 确保_error[0]和_error[1]是有限的
+      ROS_ASSERT_MSG(std::isfinite(_error[0]) && std::isfinite(_error[1]), "EdgeKinematicsDiffDrive::computeError() _error[0]=%f _error[1]=%f\n",_error[0],_error[1]);
+    }
+  /**
+   * @brief 实际的成本函数
+   */    
+  void computeError()
+  {
+    ROS_ASSERT_MSG(cfg_, "你必须在EdgeKinematicsCarlike()上调用setTebConfig");
+    const VertexPose* conf1 = static_cast<const VertexPose*>(_vertices[0]);
+    const VertexPose* conf2 = static_cast<const VertexPose*>(_vertices[1]);
+    
+    Eigen::Vector2d deltaS = conf2->position() - conf1->position();
+
+    // 非全向约束
+    _error[0] = fabs( ( cos(conf1->theta())+cos(conf2->theta()) ) * deltaS[1] - ( sin(conf1->theta())+sin(conf2->theta()) ) * deltaS[0] );
+
+    // 限制最小转弯半径
+    double angle_diff = g2o::normalize_theta( conf2->theta() - conf1->theta() );
+    if (angle_diff == 0)
+      _error[1] = 0; // 直线运动
+    else if (cfg_->trajectory.exact_arc_length) // 使用半径的精确计算，计算弧长的公式。
+      _error[1] = penaltyBoundFromBelow(fabs(deltaS.norm()/(2*sin(angle_diff/2))), cfg_->robot.min_turning_radius, 0.0);
+    else
+      _error[1] = penaltyBoundFromBelow(deltaS.norm() / fabs(angle_diff), cfg_->robot.min_turning_radius, 0.0); 
+    // 这个边缘不受epsilon参数的影响，用户可能会在min_turning_radius参数上添加额外的边距。
+    
+    ROS_ASSERT_MSG(std::isfinite(_error[0]) && std::isfinite(_error[1]), "EdgeKinematicsCarlike::computeError() _error[0]=%f _error[1]=%f\n",_error[0],_error[1]);
   }

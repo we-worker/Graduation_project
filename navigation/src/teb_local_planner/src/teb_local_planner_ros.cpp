@@ -228,8 +228,10 @@ bool TebLocalPlannerROS::computeVelocityCommands(geometry_msgs::Twist& cmd_vel)
   std::string dummy_message;
   geometry_msgs::PoseStamped dummy_pose;
   geometry_msgs::TwistStamped dummy_velocity, cmd_vel_stamped;
+  // 计算速度命令
   uint32_t outcome = computeVelocityCommands(dummy_pose, dummy_velocity, cmd_vel_stamped, dummy_message);
   cmd_vel = cmd_vel_stamped.twist;
+  // 判断是否成功
   return outcome == mbf_msgs::ExePathResult::SUCCESS;
 }
 
@@ -238,7 +240,7 @@ uint32_t TebLocalPlannerROS::computeVelocityCommands(const geometry_msgs::PoseSt
                                                      geometry_msgs::TwistStamped &cmd_vel,
                                                      std::string &message)
 {
-  // check if plugin initialized
+  // 检查插件是否初始化
   if(!initialized_)
   {
     ROS_ERROR("teb_local_planner has not been initialized, please call initialize() before using this planner");
@@ -253,22 +255,22 @@ uint32_t TebLocalPlannerROS::computeVelocityCommands(const geometry_msgs::PoseSt
   cmd_vel.twist.linear.x = cmd_vel.twist.linear.y = cmd_vel.twist.angular.z = 0;
   goal_reached_ = false;  
   
-  // Get robot pose
+  // 获取机器人姿态
   geometry_msgs::PoseStamped robot_pose;
   costmap_ros_->getRobotPose(robot_pose);
   robot_pose_ = PoseSE2(robot_pose.pose);
     
-  // Get robot velocity
+  // 获取机器人速度
   geometry_msgs::PoseStamped robot_vel_tf;
   odom_helper_.getRobotVel(robot_vel_tf);
   robot_vel_.linear.x = robot_vel_tf.pose.position.x;
   robot_vel_.linear.y = robot_vel_tf.pose.position.y;
   robot_vel_.angular.z = tf2::getYaw(robot_vel_tf.pose.orientation);
   
-  // prune global plan to cut off parts of the past (spatially before the robot)
+  // 修剪全局计划，剪掉过去的部分（空间上在机器人之前的部分）
   pruneGlobalPlan(*tf_, robot_pose, global_plan_, cfg_.trajectory.global_plan_prune_distance);
 
-  // Transform global plan to the frame of interest (w.r.t. the local costmap)
+  // 将全局计划转换为感兴趣的框架（相对于本地costmap）
   std::vector<geometry_msgs::PoseStamped> transformed_plan;
   int goal_idx;
   geometry_msgs::TransformStamped tf_plan_to_global;
@@ -280,14 +282,14 @@ uint32_t TebLocalPlannerROS::computeVelocityCommands(const geometry_msgs::PoseSt
     return mbf_msgs::ExePathResult::INTERNAL_ERROR;
   }
 
-  // update via-points container
+  // 更新通过点容器
   if (!custom_via_points_active_)
     updateViaPointsContainer(transformed_plan, cfg_.trajectory.global_plan_viapoint_sep);
 
   nav_msgs::Odometry base_odom;
   odom_helper_.getOdom(base_odom);
 
-  // check if global goal is reached
+  // 检查是否达到全局目标
   geometry_msgs::PoseStamped global_goal;
   tf2::doTransform(global_plan_.back(), global_goal, tf_plan_to_global);
   double dx = global_goal.pose.position.x - robot_pose_.x();
@@ -303,11 +305,11 @@ uint32_t TebLocalPlannerROS::computeVelocityCommands(const geometry_msgs::PoseSt
     return mbf_msgs::ExePathResult::SUCCESS;
   }
 
-  // check if we should enter any backup mode and apply settings
+  // 检查是否应进入任何备份模式并应用设置
   configureBackupModes(transformed_plan, goal_idx);
   
-    
-  // Return false if the transformed global plan is empty
+  
+  // 如果转换后的全局计划为空，则返回false
   if (transformed_plan.empty())
   {
     ROS_WARN("Transformed plan is empty. Cannot determine a local plan.");
@@ -315,14 +317,14 @@ uint32_t TebLocalPlannerROS::computeVelocityCommands(const geometry_msgs::PoseSt
     return mbf_msgs::ExePathResult::INVALID_PATH;
   }
               
-  // Get current goal point (last point of the transformed plan)
+  // 获取当前目标点（转换计划的最后一点）
   robot_goal_.x() = transformed_plan.back().pose.position.x;
   robot_goal_.y() = transformed_plan.back().pose.position.y;
-  // Overwrite goal orientation if needed
+  // 如果需要，覆盖目标方向
   if (cfg_.trajectory.global_plan_overwrite_orientation)
   {
     robot_goal_.theta() = estimateLocalGoalOrientation(global_plan_, transformed_plan.back(), goal_idx, tf_plan_to_global);
-    // overwrite/update goal orientation of the transformed plan with the actual goal (enable using the plan as initialization)
+    // 用实际目标覆盖/更新转换计划的目标方向（允许将计划用作初始化）
     tf2::Quaternion q;
     q.setRPY(0, 0, robot_goal_.theta());
     tf2::convert(q, transformed_plan.back().pose.orientation);
@@ -332,63 +334,63 @@ uint32_t TebLocalPlannerROS::computeVelocityCommands(const geometry_msgs::PoseSt
     robot_goal_.theta() = tf2::getYaw(transformed_plan.back().pose.orientation);
   }
 
-  // overwrite/update start of the transformed plan with the actual robot position (allows using the plan as initial trajectory)
-  if (transformed_plan.size()==1) // plan only contains the goal
+  // 用实际的机器人位置覆盖/更新转换计划的开始（允许将计划用作初始轨迹）
+  if (transformed_plan.size()==1) // 计划只包含目标
   {
-    transformed_plan.insert(transformed_plan.begin(), geometry_msgs::PoseStamped()); // insert start (not yet initialized)
+    transformed_plan.insert(transformed_plan.begin(), geometry_msgs::PoseStamped()); // 插入开始（尚未初始化）
   }
-  transformed_plan.front() = robot_pose; // update start
+  transformed_plan.front() = robot_pose; // 更新开始
     
-  // clear currently existing obstacles
+  // 清除当前存在的障碍物
   obstacles_.clear();
   
-  // Update obstacle container with costmap information or polygons provided by a costmap_converter plugin
+  // 使用costmap信息或由costmap_converter插件提供的多边形更新障碍物容器
   if (costmap_converter_)
     updateObstacleContainerWithCostmapConverter();
   else
     updateObstacleContainerWithCostmap();
   
-  // also consider custom obstacles (must be called after other updates, since the container is not cleared)
+  // 也考虑自定义障碍物（必须在其他更新之后调用，因为容器不会被清除）
   updateObstacleContainerWithCustomObstacles();
   
     
-  // Do not allow config changes during the following optimization step
+  // 在接下来的优化步骤中，不允许配置更改
   boost::mutex::scoped_lock cfg_lock(cfg_.configMutex());
     
-  // Now perform the actual planning
-//   bool success = planner_->plan(robot_pose_, robot_goal_, robot_vel_, cfg_.goal_tolerance.free_goal_vel); // straight line init
+  // 现在进行实际的规划
+//   bool success = planner_->plan(robot_pose_, robot_goal_, robot_vel_, cfg_.goal_tolerance.free_goal_vel); // 直线初始化
   bool success = planner_->plan(transformed_plan, &robot_vel_, cfg_.goal_tolerance.free_goal_vel);
   if (!success)
   {
-    planner_->clearPlanner(); // force reinitialization for next time
+    planner_->clearPlanner(); // 强制下次重新初始化
     ROS_WARN("teb_local_planner was not able to obtain a local plan for the current setting.");
     
-    ++no_infeasible_plans_; // increase number of infeasible solutions in a row
+    ++no_infeasible_plans_; // 增加连续无法实现的解决方案的数量
     time_last_infeasible_plan_ = ros::Time::now();
     last_cmd_ = cmd_vel.twist;
     message = "teb_local_planner was not able to obtain a local plan";
     return mbf_msgs::ExePathResult::NO_VALID_CMD;
   }
 
-  // Check for divergence
+  // 检查是否发散
   if (planner_->hasDiverged())
   {
     cmd_vel.twist.linear.x = cmd_vel.twist.linear.y = cmd_vel.twist.angular.z = 0;
 
-    // Reset everything to start again with the initialization of new trajectories.
+    // 重置所有内容，以便重新开始新轨迹的初始化。
     planner_->clearPlanner();
     ROS_WARN_THROTTLE(1.0, "TebLocalPlannerROS: the trajectory has diverged. Resetting planner...");
 
-    ++no_infeasible_plans_; // increase number of infeasible solutions in a row
+    ++no_infeasible_plans_; // 增加连续无法实现的解决方案的数量
     time_last_infeasible_plan_ = ros::Time::now();
     last_cmd_ = cmd_vel.twist;
     return mbf_msgs::ExePathResult::NO_VALID_CMD;
   }
-         
-  // Check feasibility (but within the first few states only)
+          
+  // 检查可行性（但只在前几个状态中）
   if(cfg_.robot.is_footprint_dynamic)
   {
-    // Update footprint of the robot and minimum and maximum distance from the center of the robot to its footprint vertices.
+    // 更新机器人的足迹和从机器人中心到其足迹顶点的最小和最大距离。
     footprint_spec_ = costmap_ros_->getRobotFootprint();
     costmap_2d::calculateMinAndMaxDistances(footprint_spec_, robot_inscribed_radius_, robot_circumscribed_radius);
   }
@@ -398,40 +400,40 @@ uint32_t TebLocalPlannerROS::computeVelocityCommands(const geometry_msgs::PoseSt
   {
     cmd_vel.twist.linear.x = cmd_vel.twist.linear.y = cmd_vel.twist.angular.z = 0;
 
-    // now we reset everything to start again with the initialization of new trajectories.
+    // 现在我们重置所有内容，以便重新开始新轨迹的初始化。
     planner_->clearPlanner();
     ROS_WARN("TebLocalPlannerROS: trajectory is not feasible. Resetting planner...");
     
-    ++no_infeasible_plans_; // increase number of infeasible solutions in a row
+    ++no_infeasible_plans_; // 增加连续无法实现的解决方案的数量
     time_last_infeasible_plan_ = ros::Time::now();
     last_cmd_ = cmd_vel.twist;
     message = "teb_local_planner trajectory is not feasible";
     return mbf_msgs::ExePathResult::NO_VALID_CMD;
   }
 
-  // Get the velocity command for this sampling interval
+  // 获取此采样间隔的速度命令
   if (!planner_->getVelocityCommand(cmd_vel.twist.linear.x, cmd_vel.twist.linear.y, cmd_vel.twist.angular.z, cfg_.trajectory.control_look_ahead_poses))
 
   {
     planner_->clearPlanner();
     ROS_WARN("TebLocalPlannerROS: velocity command invalid. Resetting planner...");
-    ++no_infeasible_plans_; // increase number of infeasible solutions in a row
+    ++no_infeasible_plans_; // 增加连续无法实现的解决方案的数量
     time_last_infeasible_plan_ = ros::Time::now();
     last_cmd_ = cmd_vel.twist;
     message = "teb_local_planner velocity command invalid";
     return mbf_msgs::ExePathResult::NO_VALID_CMD;
   }
-  //TODO
+  //TODO 限制x，y和z不能同时出现
   //限制x，y和z不能同时出现
-  if (std::abs(cmd_vel.twist.linear.x) < 0.01) {
-    cmd_vel.twist.linear.x = 0;
-  }
-  if (std::abs(cmd_vel.twist.linear.y) < 0.01) {
-    cmd_vel.twist.linear.y = 0;
-  }
-  if (std::abs(cmd_vel.twist.linear.x) >= 0.01 || std::abs(cmd_vel.twist.linear.y) >= 0.01) {
-    cmd_vel.twist.angular.z = 0;
-  }
+  // if (std::abs(cmd_vel.twist.linear.x) < 0.01) {
+  //   cmd_vel.twist.linear.x = 0;
+  // }
+  // if (std::abs(cmd_vel.twist.linear.y) < 0.01) {
+  //   cmd_vel.twist.linear.y = 0;
+  // }
+  // if (std::abs(cmd_vel.twist.linear.x) >= 0.01 || std::abs(cmd_vel.twist.linear.y) >= 0.01) {
+  //   cmd_vel.twist.angular.z = 0;
+  // }
   // Saturate velocity, if the optimization results violates the constraints (could be possible due to soft constraints).
   saturateVelocity(cmd_vel.twist.linear.x, cmd_vel.twist.linear.y, cmd_vel.twist.angular.z,
                    cfg_.robot.max_vel_x, cfg_.robot.max_vel_y, cfg_.robot.max_vel_trans, cfg_.robot.max_vel_theta, 

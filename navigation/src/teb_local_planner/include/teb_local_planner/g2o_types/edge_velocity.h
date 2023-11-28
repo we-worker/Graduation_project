@@ -251,12 +251,12 @@ public:
     double vx = r_dx / deltaT->estimate();
     double vy = r_dy / deltaT->estimate();
     double omega = g2o::normalize_theta(conf2->theta() - conf1->theta()) / deltaT->estimate();
-
+    // double omega = g2o::normalize_theta(conf1->theta());
     //TODO
     // 添加新的约束：线速度和角速度不能同时存在
-    if ((vx != 0 || vy != 0) && omega != 0) {
-      omega = 0;  // 将角速度设置为0
-    }
+    // if ((vx != 0 || vy != 0) && omega != 0) {
+    //   omega = 0;  // 将角速度设置为0
+    // }
 
 
     double max_vel_trans_remaining_y;

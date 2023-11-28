@@ -169,32 +169,31 @@ public:
 
 /**
  * @class EdgeKinematicsCarlike
- * @brief Edge defining the cost function for satisfying the non-holonomic kinematics of a carlike mobile robot.
+ * @brief 定义了满足类似汽车移动机器人的非全向运动学的成本函数的边缘。
  * 
- * The edge depends on two vertices \f$ \mathbf{s}_i, \mathbf{s}_{ip1} \f$ and minimizes a geometric interpretation
- * of the non-holonomic constraint: 
- *  - C. Rösmann et al.: Trajectory modification considering dynamic constraints of autonomous robots, ROBOTIK, 2012.
+ * 这个边缘依赖于两个顶点 \f$ \mathbf{s}_i, \mathbf{s}_{ip1} \f$ 并最小化非全向约束的几何解释：
+ *  - C. Rösmann等：考虑自动机器人的动态约束的轨迹修改，ROBOTIK，2012。
  * 
- * The definition is identically to the one of the differential drive robot.
- * Additionally, this edge incorporates a minimum turning radius that is required by carlike robots.
- * The turning radius is defined by \f$ r=v/omega \f$.
+ * 这个定义与差分驱动机器人的定义相同。
+ * 此外，这个边缘包含了类似汽车的机器人所需的最小转弯半径。
+ * 转弯半径由 \f$ r=v/omega \f$ 定义。
  * 
- * The \e weight can be set using setInformation(): Matrix element 1,1: (Choose a very high value: ~1000). \n
- * The second equation enforces a minimum turning radius.
- * The \e weight can be set using setInformation(): Matrix element 2,2. \n
- * The dimension of the error / cost vector is 3: the first component represents the nonholonomic constraint cost, 
- * the second one backward-drive cost and the third one the minimum turning radius
+ * 可以使用setInformation()设置 \e weight：矩阵元素1,1：（选择一个非常高的值：~1000）。\n
+ * 第二个方程强制执行最小转弯半径。
+ * 可以使用setInformation()设置 \e weight：矩阵元素2,2。 \n
+ * 错误/成本向量的维度为3：第一个组件代表非全向约束成本，
+ * 第二个是后向驱动成本，第三个是最小转弯半径
  * @see TebOptimalPlanner::AddEdgesKinematics, EdgeKinematicsDiffDrive
- * @remarks Bounding the turning radius from below is not affected by the penalty_epsilon parameter, 
- *          the user might add an extra margin to the min_turning_radius param.
- * @remarks Do not forget to call setTebConfig()
+ * @remarks 从下面限制转弯半径不受penalty_epsilon参数的影响，
+ *          用户可能会在min_turning_radius参数上添加额外的边距。
+ * @remarks 不要忘记调用setTebConfig()
  */    
 class EdgeKinematicsCarlike : public BaseTebBinaryEdge<2, double, VertexPose, VertexPose>
 {
 public:
   
   /**
-   * @brief Construct edge.
+   * @brief 构造边缘。
    */  
   EdgeKinematicsCarlike()
   {
@@ -202,28 +201,28 @@ public:
   }
   
   /**
-   * @brief Actual cost function
+   * @brief 实际的成本函数
    */    
   void computeError()
   {
-    ROS_ASSERT_MSG(cfg_, "You must call setTebConfig on EdgeKinematicsCarlike()");
+    ROS_ASSERT_MSG(cfg_, "你必须在EdgeKinematicsCarlike()上调用setTebConfig");
     const VertexPose* conf1 = static_cast<const VertexPose*>(_vertices[0]);
     const VertexPose* conf2 = static_cast<const VertexPose*>(_vertices[1]);
     
     Eigen::Vector2d deltaS = conf2->position() - conf1->position();
 
-    // non holonomic constraint
+    // 非全向约束
     _error[0] = fabs( ( cos(conf1->theta())+cos(conf2->theta()) ) * deltaS[1] - ( sin(conf1->theta())+sin(conf2->theta()) ) * deltaS[0] );
 
-    // limit minimum turning radius
+    // 限制最小转弯半径
     double angle_diff = g2o::normalize_theta( conf2->theta() - conf1->theta() );
     if (angle_diff == 0)
-      _error[1] = 0; // straight line motion
-    else if (cfg_->trajectory.exact_arc_length) // use exact computation of the radius
+      _error[1] = 0; // 直线运动
+    else if (cfg_->trajectory.exact_arc_length) // 使用半径的精确计算
       _error[1] = penaltyBoundFromBelow(fabs(deltaS.norm()/(2*sin(angle_diff/2))), cfg_->robot.min_turning_radius, 0.0);
     else
       _error[1] = penaltyBoundFromBelow(deltaS.norm() / fabs(angle_diff), cfg_->robot.min_turning_radius, 0.0); 
-    // This edge is not affected by the epsilon parameter, the user might add an exra margin to the min_turning_radius parameter.
+    // 这个边缘不受epsilon参数的影响，用户可能会在min_turning_radius参数上添加额外的边距。
     
     ROS_ASSERT_MSG(std::isfinite(_error[0]) && std::isfinite(_error[1]), "EdgeKinematicsCarlike::computeError() _error[0]=%f _error[1]=%f\n",_error[0],_error[1]);
   }
@@ -231,7 +230,6 @@ public:
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW   
 };
-
 
 
 

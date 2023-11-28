@@ -703,12 +703,12 @@ public:
     double omega1 = g2o::normalize_theta(pose_goal->theta() - pose_pre_goal->theta()) / dt->dt();
     double omega2 = _measurement->angular.z;
     double acc_rot  = (omega2 - omega1) / dt->dt();
-
+    // acc_rot=0;
     //TODO
     // 添加新的约束：线速度和角速度不能同时存在
-    if ((acc_lin_x != 0 || acc_lin_y != 0) && acc_rot != 0) {
-      acc_rot = 0;  // 将角速度设置为0
-    }
+    // if ((acc_lin_x != 0 || acc_lin_y != 0) && acc_rot != 0) {
+    //   acc_rot = 0;  // 将角速度设置为0
+    // }
       
     _error[2] = penaltyBoundToInterval(acc_rot,cfg_->robot.acc_lim_theta,cfg_->optim.penalty_epsilon);
     ROS_ASSERT_MSG(std::isfinite(_error[0]), "EdgeAccelerationGoal::computeError() translational: _error[0]=%f\n",_error[0]);
