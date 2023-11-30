@@ -37,7 +37,7 @@
 	<!-- <node name="map_server" pkg="map_server" type="map_server" args="$(find teb_local_planner_tutorials)/maps/maze.yaml" output="screen">
                 <param name="frame_id" value="map"/>
 	</node> -->
-	<node name="map_server" pkg="map_server" type="map_server" args="/home/arc/Downloads/902/902.yaml" output="screen">
+	<node name="map_server" pkg="map_server" type="map_server" args="/home/lt/Graduation_project/Map_bag_database/902/902.yaml" output="screen">
                 <param name="frame_id" value="map"/>
 	</node>
 

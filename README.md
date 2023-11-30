@@ -94,6 +94,7 @@
 8. **编译navigation**
     ```bash
     cd Graduation_project/navigation
+    rosdep install --from-paths src --ignore-src -r -y
     catkin_make
     ```
 

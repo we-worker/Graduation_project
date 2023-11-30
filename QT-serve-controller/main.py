@@ -22,13 +22,13 @@ def handle_client(client_socket):
 			if cmd_id == 'ALL':
 				for cmd_id in commands.keys():
 					threading.Thread(target=stop_command, args=(cmd_id, client_socket)).start()
-					time.sleep(2)
+					time.sleep(5)
 			else:
 				threading.Thread(target=stop_command, args=(cmd_id, client_socket)).start()
 	client_socket.close()
 
 def server_program():
-    host = 'localhost'
+    host = '0.0.0.0'
     port = 2333
 
     server_socket = socket.socket()
