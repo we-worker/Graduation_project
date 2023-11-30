@@ -448,12 +448,12 @@ bool TimedElasticBand::initTrajectoryToGoal(const std::vector<geometry_msgs::Pos
         // 如果 estimate_orient 为假，那么直接从路径点 i 的位姿中获取 yaw
         yaw = tf::getYaw(plan[i].pose.orientation);
       }
-      // PoseSE2 plani(plan[i].pose.position.x, plan[i].pose.position.y, 0);
-      //    Eigen::Vector2d planpoint_to_goal = goal.position()-plani.position();
-      // double dir_to_goal = std::atan2(planpoint_to_goal[1],planpoint_to_goal[0]); // 方向到目标
+      PoseSE2 plani(plan[i].pose.position.x, plan[i].pose.position.y, 0);
+         Eigen::Vector2d planpoint_to_goal = goal.position()-plani.position();
+      double dir_to_goal2 = std::atan2(planpoint_to_goal[1],planpoint_to_goal[0]); // 方向到目标
 
       // 创建一个中间位姿
-      PoseSE2 intermediate_pose(plan[i].pose.position.x, plan[i].pose.position.y, dir_to_goal);
+      PoseSE2 intermediate_pose(plan[i].pose.position.x, plan[i].pose.position.y, dir_to_goal2);
       // 估计从上一个位姿到这个中间位姿的时间差
       double dt = estimateDeltaT(BackPose(), intermediate_pose, max_vel_x, max_vel_theta);
       // 将这个中间位姿和时间差添加到列表中
