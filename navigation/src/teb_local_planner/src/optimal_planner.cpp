@@ -50,6 +50,8 @@
 #include <teb_local_planner/g2o_types/edge_via_point.h>
 #include <teb_local_planner/g2o_types/edge_prefer_rotdir.h>
 
+#include <teb_local_planner/g2o_types/dyp_LinearAndAngularSpeed.h>
+
 #include <memory>
 #include <limits>
 
@@ -289,36 +291,45 @@ bool TebOptimalPlanner::plan(const tf::Pose& start, const tf::Pose& goal, const 
 
 bool TebOptimalPlanner::plan(const PoseSE2& start, const PoseSE2& goal, const geometry_msgs::Twist* start_vel, bool free_goal_vel)
 {	
+  // 确保已经初始化
   ROS_ASSERT_MSG(initialized_, "Call initialize() first.");
   if (!teb_.isInit())
   {
-    // init trajectory
+    // 初始化轨迹
     teb_.initTrajectoryToGoal(start, goal, 0, cfg_->robot.max_vel_x, cfg_->trajectory.min_samples, cfg_->trajectory.allow_init_with_backwards_motion); // 0 intermediate samples, but dt=1 -> autoResize will add more samples before calling first optimization
   }
-  else // warm start
+  else // 热启动
   {
+    // 如果TEB中的姿态数量大于0
+    // 并且目标位置与TEB末尾姿态的位置之间的距离小于重新初始化新目标的距离阈值
+    // 并且目标角度与TEB末尾姿态的角度之间的差值（经过归一化处理）小于重新初始化新目标的角度阈值
+    // 则进行实际的热启动
     if (teb_.sizePoses() > 0
         && (goal.position() - teb_.BackPose().position()).norm() < cfg_->trajectory.force_reinit_new_goal_dist
-        && fabs(g2o::normalize_theta(goal.theta() - teb_.BackPose().theta())) < cfg_->trajectory.force_reinit_new_goal_angular) // actual warm start!
+        && fabs(g2o::normalize_theta(goal.theta() - teb_.BackPose().theta())) < cfg_->trajectory.force_reinit_new_goal_angular)
+      {// 更新并修剪TEB，保证至少有min_samples个样本
       teb_.updateAndPruneTEB(start, goal, cfg_->trajectory.min_samples);
-    else // goal too far away -> reinit
+      std::cout<<"updateAndPruneTEB!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
+      }
+    else // 目标太远 -> 重新初始化
     {
       ROS_DEBUG("New goal: distance to existing goal is higher than the specified threshold. Reinitalizing trajectories.");
+      std::cout<<"reinitTrajectoryToGoal!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
+      
       teb_.clearTimedElasticBand();
       teb_.initTrajectoryToGoal(start, goal, 0, cfg_->robot.max_vel_x, cfg_->trajectory.min_samples, cfg_->trajectory.allow_init_with_backwards_motion);
     }
   }
   if (start_vel)
-    setVelocityStart(*start_vel);
+    setVelocityStart(*start_vel); // 设置起始速度
   if (free_goal_vel)
-    setVelocityGoalFree();
+    setVelocityGoalFree(); // 设置目标速度为自由
   else
-    vel_goal_.first = true; // we just reactivate and use the previously set velocity (should be zero if nothing was modified)
+    vel_goal_.first = true; // 我们只是重新激活并使用之前设置的速度（如果没有修改过，应该为零）
       
-  // now optimize
-  return optimizeTEB(cfg_->optim.no_inner_iterations, cfg_->optim.no_outer_iterations);
+  // 现在优化
+  return optimizeTEB(cfg_->optim.no_inner_iterations, cfg_->optim.no_outer_iterations); // 返回优化结果
 }
-
 
 bool TebOptimalPlanner::buildGraph(double weight_multiplier)
 {
@@ -351,7 +362,7 @@ bool TebOptimalPlanner::buildGraph(double weight_multiplier)
   AddEdgesTimeOptimal(); // 添加时间最优约束	
 
   AddEdgesShortestPath(); // 添加最短路径约束
-  
+
 
   if (cfg_->robot.min_turning_radius == 0 || cfg_->optim.weight_kinematics_turning_radius == 0){
     AddEdgesKinematicsDiffDrive(); // 添加差分驱动机器人的运动学约束
@@ -365,6 +376,8 @@ bool TebOptimalPlanner::buildGraph(double weight_multiplier)
   if (cfg_->optim.weight_velocity_obstacle_ratio > 0)
     AddEdgesVelocityObstacleRatio(); // 添加速度障碍物比例约束
     
+  AddEdgesNoSimultaneousLinearAndAngularSpeed();//线速度y与角速度不能同时为0
+
   return true;  
 }
 
@@ -1138,6 +1151,15 @@ void TebOptimalPlanner::extractVelocity(const PoseSE2& pose1, const PoseSE2& pos
   // rotational velocity
   double orientdiff = g2o::normalize_theta(pose2.theta() - pose1.theta());
   omega = orientdiff/dt;
+  
+  //TODO 限制y和z不能同时出现
+  //限制y和z不能同时出现
+  if (std::abs(omega) < 0.03) {
+    omega = 0;
+  }
+  if (std::abs(omega) >= 0.03) {
+    vy = 0;
+  }
 }
 
 bool TebOptimalPlanner::getVelocityCommand(double& vx, double& vy, double& omega, int look_ahead_poses) const
@@ -1318,6 +1340,25 @@ bool TebOptimalPlanner::isTrajectoryFeasible(base_local_planner::CostmapModel* c
     }
   }
   return true;
+}
+
+
+void TebOptimalPlanner::AddEdgesNoSimultaneousLinearAndAngularSpeed()
+{
+  // create edge for satisfying the constraint that linear and angular speed should not exist at the same time
+  Eigen::Matrix<double,1,1> information_no_simultaneous_speed;
+  // information_no_simultaneous_speed.fill(cfg_->optim.weight_no_simultaneous_speed);
+  information_no_simultaneous_speed.fill(10000);
+
+  for (int i=0; i < teb_.sizePoses()-1; ++i) // apply to all rotations
+  {
+    EdgeNoSimultaneousLinearAndAngularSpeed* no_simultaneous_speed_edge = new EdgeNoSimultaneousLinearAndAngularSpeed;
+    no_simultaneous_speed_edge->setVertex(0,teb_.PoseVertex(i));
+    no_simultaneous_speed_edge->setVertex(1,teb_.PoseVertex(i+1));      
+    no_simultaneous_speed_edge->setInformation(information_no_simultaneous_speed);
+    
+    optimizer_->addEdge(no_simultaneous_speed_edge);
+  }
 }
 
 } // namespace teb_local_planner
