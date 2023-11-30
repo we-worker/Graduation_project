@@ -17,13 +17,14 @@ TebLocalPlannerROS:
   # Robot
   max_vel_x: 0.2 #最大线速度
   max_vel_x_backwards: 0.2 #最大后退线速度
-  max_vel_y: 0.0 #最大横向速度
+  max_vel_y: 0.2 #最大横向速度
   max_vel_theta: 0.2 #最大角速度
   acc_lim_x: 0.5 #最大线加速度
   acc_lim_theta: 0.5 #最大角加速度
 
   # ********************** Carlike robot parameters ********************
-  min_turning_radius: 0.810 #最小转弯半径
+  # min_turning_radius: 0.810 #最小转弯半径
+  min_turning_radius: 0 #最小转弯半径
   wheelbase: 0.4 #轮距
   cmd_angle_instead_rotvel: False #是否使用角度代替角速度
   # ********************************************************************
@@ -32,7 +33,7 @@ TebLocalPlannerROS:
     type: "line" #类型
     radius: 0.2 #半径（对于类型“circular”）
     line_start: [-0.30, 0.0] #起点（对于类型“line”）
-    line_end: [0.40, 0.0] #终点（对于类型“line”）
+    line_end: [0.30, 0.0] #终点（对于类型“line”）
     front_offset: 0.2 #前部偏移（对于类型“two_circles”）
     front_radius: 0.2 #前部半径（对于类型“two_circles”）
     rear_offset: 0.2 #后部偏移（对于类型“two_circles”）
@@ -47,8 +48,8 @@ TebLocalPlannerROS:
   complete_global_plan: True #是否完成全局路径
   # Obstacles
       
-  min_obstacle_dist: 0.6 #机器人与障碍物之间的最小距离，这个值还必须包括我们机器人的扩展，因为footprint_model设置为“line”。
-  inflation_dist: 0.6 #膨胀距离
+  min_obstacle_dist: 0.2 #机器人与障碍物之间的最小距离，这个值还必须包括我们机器人的扩展，因为footprint_model设置为“line”。
+  inflation_dist: 0.4 #膨胀距离
   include_costmap_obstacles: True #是否包括代价地图障碍物
   costmap_obstacles_behind_robot_dist: 1.0 #机器人后面的代价地图障碍物距离
   obstacle_poses_affected: 15 #障碍物姿态影响
@@ -73,7 +74,7 @@ TebLocalPlannerROS:
   weight_acc_lim_x: 1 #线加速度权重
   weight_acc_lim_theta: 1 #角加速度权重
   weight_kinematics_nh: 1000 #非完整机器人权重
-  weight_kinematics_forward_drive: 1 #前向驱动权重
+  weight_kinematics_forward_drive: 100 #前向驱动权重
   weight_kinematics_turning_radius: 1 #转弯半径权重
   weight_optimaltime: 1 #时间最优权重，必须大于0
   weight_shortest_path: 0 #最短路径权重

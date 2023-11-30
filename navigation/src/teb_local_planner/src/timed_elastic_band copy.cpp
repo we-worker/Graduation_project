@@ -375,11 +375,11 @@ bool TimedElasticBand::initTrajectoryToGoal(const PoseSE2& start, const PoseSE2&
       ROS_DEBUG("initTEBtoGoal(): 生成的样本数量少于min_samples指定的数量。强制插入更多样本...");
       while (sizePoses() < min_samples-1) // 减去稍后将添加的目标点
       {
-          // Eigen::Vector2d point_to_goal = goal.position()-BackPose().position();
-          // double dir_to_goal = std::atan2(point_to_goal[1],point_to_goal[0]); // 方向到目标
-          // PoseSE2 goal2(goal.x(), goal.y(), dir_to_goal);
+          Eigen::Vector2d point_to_goal = goal.position()-BackPose().position();
+          double dir_to_goal = std::atan2(point_to_goal[1],point_to_goal[0]); // 方向到目标
+          PoseSE2 goal2(goal.x(), goal.y(), dir_to_goal);
         // 简单策略：在当前姿态和目标之间插值
-        PoseSE2 intermediate_pose = PoseSE2::average(BackPose(), goal);
+        PoseSE2 intermediate_pose = PoseSE2::average(BackPose(), goal2);
         if (max_vel_x > 0) timestep = (intermediate_pose.position()-BackPose().position()).norm()/max_vel_x;
         addPoseAndTimeDiff( intermediate_pose, timestep ); // 让优化器校正时间步长（TODO: 更好的初始化）
       }
@@ -387,15 +387,17 @@ bool TimedElasticBand::initTrajectoryToGoal(const PoseSE2& start, const PoseSE2&
     
     //TODO 目标位置不带方向
     // 添加目标
-    if (max_vel_x > 0) timestep = (goal.position()-BackPose().position()).norm()/max_vel_x;
-    addPoseAndTimeDiff(goal,timestep); // 添加目标点
-    setPoseVertexFixed(sizePoses()-1,true); // 在优化过程中，GoalConf是一个固定的约束	
-    // // 添加目标
     // if (max_vel_x > 0) timestep = (goal.position()-BackPose().position()).norm()/max_vel_x;
-    // // 使用当前路径的最后一个点的方向作为目标点的方向
-    // PoseSE2 goal_without_orientation(goal.x(), goal.y(), BackPose().theta());
-    // addPoseAndTimeDiff(goal_without_orientation, timestep); // 添加目标点
-    // setPoseVertexFixed(sizePoses()-1,true); // 在优化过程中，GoalConf是一个固定的约束
+    // addPoseAndTimeDiff(goal,timestep); // 添加目标点
+    // setPoseVertexFixed(sizePoses()-1,true); // 在优化过程中，GoalConf是一个固定的约束	
+    // 添加目标
+    if (max_vel_x > 0) timestep = (goal.position()-BackPose().position()).norm()/max_vel_x;
+    // 使用当前路径的最后一个点的方向作为目标点的方向
+    Eigen::Vector2d point_to_goal = goal.position()-BackPose().position();
+    double dir_to_goal = std::atan2(point_to_goal[1],point_to_goal[0]); // 方向到目标
+    PoseSE2 goal2(goal.x(), goal.y(), dir_to_goal);
+    addPoseAndTimeDiff(goal2, timestep); // 添加目标点
+    setPoseVertexFixed(sizePoses()-1,true); // 在优化过程中，GoalConf是一个固定的约束
   }
   else // size!=0
   {
@@ -407,8 +409,6 @@ bool TimedElasticBand::initTrajectoryToGoal(const PoseSE2& start, const PoseSE2&
 }
 
 
-
-//路径规划方向核心代码
 bool TimedElasticBand::initTrajectoryToGoal(const std::vector<geometry_msgs::PoseStamped>& plan, double max_vel_x, double max_vel_theta, bool estimate_orient, int min_samples, bool guess_backwards_motion)
 {
   
@@ -429,35 +429,25 @@ bool TimedElasticBand::initTrajectoryToGoal(const std::vector<geometry_msgs::Pos
         backwards = true;
     // TODO: dt ~ max_vel_x_backwards for backwards motions
     
-    // 遍历路径点列表，从第二个元素开始，到倒数第二个元素结束
     for (int i=1; i<(int)plan.size()-1; ++i)
     {
-      double yaw;
-      if (estimate_orient)
-      {
-        // 如果 estimate_orient 为真，那么通过计算路径点 i 和路径点 i+1 之间的距离向量的方向来获取 yaw
-        double dx = plan[i+1].pose.position.x - plan[i].pose.position.x;
-        double dy = plan[i+1].pose.position.y - plan[i].pose.position.y;
-        yaw = std::atan2(dy,dx);
-        if (backwards)
-          // 如果 backwards 为真，那么将 yaw 值正规化
-          yaw = g2o::normalize_theta(yaw+M_PI);
-      }
-      else 
-      {
-        // 如果 estimate_orient 为假，那么直接从路径点 i 的位姿中获取 yaw
-        yaw = tf::getYaw(plan[i].pose.orientation);
-      }
-      PoseSE2 plani(plan[i].pose.position.x, plan[i].pose.position.y, 0);
-         Eigen::Vector2d planpoint_to_goal = goal.position()-plani.position();
-      double dir_to_goal2 = std::atan2(planpoint_to_goal[1],planpoint_to_goal[0]); // 方向到目标
-
-      // 创建一个中间位姿
-      PoseSE2 intermediate_pose(plan[i].pose.position.x, plan[i].pose.position.y, dir_to_goal2);
-      // 估计从上一个位姿到这个中间位姿的时间差
-      double dt = estimateDeltaT(BackPose(), intermediate_pose, max_vel_x, max_vel_theta);
-      // 将这个中间位姿和时间差添加到列表中
-      addPoseAndTimeDiff(intermediate_pose, dt);
+        double yaw;
+        if (estimate_orient)
+        {
+            // get yaw from the orientation of the distance vector between pose_{i+1} and pose_{i}
+            double dx = plan[i+1].pose.position.x - plan[i].pose.position.x;
+            double dy = plan[i+1].pose.position.y - plan[i].pose.position.y;
+            yaw = std::atan2(dy,dx);
+            if (backwards)
+                yaw = g2o::normalize_theta(yaw+M_PI);
+        }
+        else 
+        {
+            yaw = tf::getYaw(plan[i].pose.orientation);
+        }
+        PoseSE2 intermediate_pose(plan[i].pose.position.x, plan[i].pose.position.y, dir_to_goal);
+        double dt = estimateDeltaT(BackPose(), intermediate_pose, max_vel_x, max_vel_theta);
+        addPoseAndTimeDiff(intermediate_pose, dt);
     }
     
     // if number of samples is not larger than min_samples, insert manually
@@ -467,15 +457,15 @@ bool TimedElasticBand::initTrajectoryToGoal(const std::vector<geometry_msgs::Pos
       while (sizePoses() < min_samples-1) // subtract goal point that will be added later
       {
         // simple strategy: interpolate between the current pose and the goal
-        PoseSE2 intermediate_pose = PoseSE2::average(BackPose(), goal);
+        PoseSE2 intermediate_pose = PoseSE2::average(BackPose(), goal2);
         double dt = estimateDeltaT(BackPose(), intermediate_pose, max_vel_x, max_vel_theta);
         addPoseAndTimeDiff( intermediate_pose, dt ); // let the optimier correct the timestep (TODO: better initialization
       }
     }
     
     // Now add final state with given orientation
-    double dt = estimateDeltaT(BackPose(), goal, max_vel_x, max_vel_theta);
-    addPoseAndTimeDiff(goal, dt);
+    double dt = estimateDeltaT(BackPose(), goal2, max_vel_x, max_vel_theta);
+    addPoseAndTimeDiff(goal2, dt);
     setPoseVertexFixed(sizePoses()-1,true); // GoalConf is a fixed constraint during optimization
   }
   else // size!=0

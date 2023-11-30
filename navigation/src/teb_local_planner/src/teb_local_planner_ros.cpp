@@ -295,6 +295,10 @@ uint32_t TebLocalPlannerROS::computeVelocityCommands(const geometry_msgs::PoseSt
   double dx = global_goal.pose.position.x - robot_pose_.x();
   double dy = global_goal.pose.position.y - robot_pose_.y();
   double delta_orient = g2o::normalize_theta( tf2::getYaw(global_goal.pose.orientation) - robot_pose_.theta() );
+  //机器人当前位置与目标位置的欧氏距离小于设定的位置容忍度
+  //机器人当前的朝向与目标朝向的差值（delta_orient）
+  //如果设置了必须完成全局路径那么必须所有的中间点（via_points_）都已经通过，即via_points_.size() == 0。
+  //机器人已经停止，或者设置了目标速度可以不为零
   if(fabs(std::sqrt(dx*dx+dy*dy)) < cfg_.goal_tolerance.xy_goal_tolerance
     && fabs(delta_orient) < cfg_.goal_tolerance.yaw_goal_tolerance
     && (!cfg_.goal_tolerance.complete_global_plan || via_points_.size() == 0)
@@ -423,16 +427,14 @@ uint32_t TebLocalPlannerROS::computeVelocityCommands(const geometry_msgs::PoseSt
     message = "teb_local_planner velocity command invalid";
     return mbf_msgs::ExePathResult::NO_VALID_CMD;
   }
-  //TODO 限制x，y和z不能同时出现
-  //限制x，y和z不能同时出现
-  // if (std::abs(cmd_vel.twist.linear.x) < 0.01) {
-  //   cmd_vel.twist.linear.x = 0;
-  // }
-  // if (std::abs(cmd_vel.twist.linear.y) < 0.01) {
-  //   cmd_vel.twist.linear.y = 0;
-  // }
-  // if (std::abs(cmd_vel.twist.linear.x) >= 0.01 || std::abs(cmd_vel.twist.linear.y) >= 0.01) {
+  //TODO 限制y和z不能同时出现
+  //限制y和z不能同时出现
+
+  // if (std::abs(cmd_vel.twist.angular.z) < 0.01) {
   //   cmd_vel.twist.angular.z = 0;
+  // }
+  // if (std::abs(cmd_vel.twist.angular.z) >= 0.01) {
+  //   cmd_vel.twist.linear.y = 0;
   // }
   // Saturate velocity, if the optimization results violates the constraints (could be possible due to soft constraints).
   saturateVelocity(cmd_vel.twist.linear.x, cmd_vel.twist.linear.y, cmd_vel.twist.angular.z,
