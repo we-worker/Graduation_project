@@ -57,3 +57,10 @@ def stop_command(cmd_id,client_socket=None):
 # # 停止命令
 # time.sleep(10)
 # stop_command('1')
+
+
+#source /home/lt/Graduation_project/pf_laser/devel/setup.bash && roslaunch pf_driver r2000.launch
+#sudo chmod 777 /dev/ttyUSB0 && source /home/lt/Graduation_project/IMU/devel/setup.sh && roslaunch handsfree_ros_imu handsfree_imu.launch
+#sudo -S modprobe gs_usb && source /home/lt/Graduation_project/ranger_ros/devel/setup.bash && rosrun ranger_bringup bringup_can2usb.bash && roslaunch ranger_bringup ranger_mini_v2.launch
+#source /home/lt/Graduation_project/cartographer/devel_isolated/setup.bash && roslaunch mycarto dyp_backpack_2d_localization.launch  load_state_filename:=/home/lt/Graduation_project/Map_bag_database/902/902.pbstream
+#source /home/lt/Graduation_project/navigation/devel/setup.bash && roslaunch ranger_2dnav dyp_carlike.launch

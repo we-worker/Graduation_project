@@ -24,7 +24,7 @@
   <!-- <node name="map_server" pkg="map_server" type="map_server" args="/home/arc/Downloads/902/902.yaml"/> -->
 
   <node name="rviz" pkg="rviz" type="rviz" required="true"
-      args="-d $(find mycarto)/configuration_files/demo_2d.rviz" />
+      args="-d $(find mycarto)/configuration_files/dyp_ranger_2d.rviz" />
 
   <node pkg="tf" type="static_transform_publisher" name="robot_to_laser"
     args="0.05 0 0.0 0.0 0.0 0.0  /imu_link /base_link 200" />
