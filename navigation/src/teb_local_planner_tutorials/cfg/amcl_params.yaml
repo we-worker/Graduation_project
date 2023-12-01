@@ -1,38 +1,38 @@
-use_map_topic: true
+use_map_topic: true  # 是否使用地图主题
 
-odom_frame_id: "odom"
-base_frame_id: "base_footprint"
-global_frame_id: "map"
+odom_frame_id: "odom"  # 里程计帧ID
+base_frame_id: "base_footprint"  # 基础帧ID
+global_frame_id: "map"  # 全局帧ID
 
 ## Publish scans from best pose at a max of 10 Hz
-odom_model_type: "diff"
-odom_alpha5: 0.1
-gui_publish_rate: 10.0
-laser_max_beams: 60
-laser_max_range: 12.0
-min_particles: 500
-max_particles: 2000
-kld_err: 0.05
-kld_z: 0.99
-odom_alpha1: 0.2
-odom_alpha2: 0.2
+odom_model_type: "omni"  # 里程计模型类型
+odom_alpha5: 0.1  # 里程计alpha5参数
+gui_publish_rate: 10.0  # GUI发布率
+laser_max_beams: 60  # 激光最大光束数
+laser_max_range: 12.0  # 激光最大范围
+min_particles: 500  # 最小粒子数
+max_particles: 2000  # 最大粒子数
+kld_err: 0.05  # KLD误差
+kld_z: 0.99  # KLD z参数
+odom_alpha1: 0.2  # 里程计alpha1参数
+odom_alpha2: 0.2  # 里程计alpha2参数
 ## translation std dev, m 
-odom_alpha3: 0.2
-odom_alpha4: 0.2
-laser_z_hit: 0.5
-aser_z_short: 0.05
-laser_z_max: 0.05
-laser_z_rand: 0.5
-laser_sigma_hit: 0.2
-laser_lambda_short: 0.1
-laser_model_type: "likelihood_field" # "likelihood_field" or "beam"
-laser_likelihood_max_dist: 2.0
-update_min_d: 0.25
-update_min_a: 0.2
+odom_alpha3: 0.2  # 里程计alpha3参数
+odom_alpha4: 0.2  # 里程计alpha4参数
+laser_z_hit: 0.5  # 激光z hit参数
+aser_z_short: 0.05  # 激光z short参数
+laser_z_max: 0.05  # 激光z max参数
+laser_z_rand: 0.5  # 激光z rand参数
+laser_sigma_hit: 0.2  # 激光sigma hit参数
+laser_lambda_short: 0.1  # 激光lambda short参数
+laser_model_type: "likelihood_field" # 激光模型类型，"likelihood_field"或"beam"
+laser_likelihood_max_dist: 2.0  # 激光可能性最大距离
+update_min_d: 0.25  # 最小更新距离
+update_min_a: 0.2  # 最小更新角度
 
-resample_interval: 1
+resample_interval: 1  # 重采样间隔
 
 ## Increase tolerance because the computer can get quite busy 
-transform_tolerance: 1.0
-recovery_alpha_slow: 0.001
-recovery_alpha_fast: 0.1
+transform_tolerance: 1.0  # 变换容忍度
+recovery_alpha_slow: 0.001  # 慢速恢复alpha参数
+recovery_alpha_fast: 0.1  # 快速恢复alpha参数

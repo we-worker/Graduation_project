@@ -1160,6 +1160,9 @@ void TebOptimalPlanner::extractVelocity(const PoseSE2& pose1, const PoseSE2& pos
   if (std::abs(omega) >= 0.03) {
     vy = 0;
   }
+  if (std::abs(omega) >= 0.07 && std::abs(vx) <= 0.04) {
+    vx = 0;
+  }
 }
 
 bool TebOptimalPlanner::getVelocityCommand(double& vx, double& vy, double& omega, int look_ahead_poses) const

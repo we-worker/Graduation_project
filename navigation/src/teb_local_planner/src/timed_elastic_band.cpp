@@ -453,7 +453,7 @@ bool TimedElasticBand::initTrajectoryToGoal(const std::vector<geometry_msgs::Pos
       double dir_to_goal2 = std::atan2(planpoint_to_goal[1],planpoint_to_goal[0]); // 方向到目标
 
       // 创建一个中间位姿
-      PoseSE2 intermediate_pose(plan[i].pose.position.x, plan[i].pose.position.y, dir_to_goal2);
+      PoseSE2 intermediate_pose(plan[i].pose.position.x, plan[i].pose.position.y, start.theta());
       // 估计从上一个位姿到这个中间位姿的时间差
       double dt = estimateDeltaT(BackPose(), intermediate_pose, max_vel_x, max_vel_theta);
       // 将这个中间位姿和时间差添加到列表中

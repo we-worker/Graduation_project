@@ -21,11 +21,11 @@ define carlike_robot position
 (
   pose [ 0.0 0.0 0.0 0.0 ]
 
-  odom_error [0.03 0.03 999999 999999 999999 0.02]
+  odom_error [0.0 0.0 999999 999999 999999 0.0]
 
   size [ 0.6 0.25 0.40 ] # this models the footprint (rectangular), but shifted such that the bottom-left corner is in [0,0]. The center of rotation now here at [0.3, 0.125, 0.2]
   # correct center of rotation:
-  origin [ 0.3 0.125 0.20 0.0]
+  origin [0 0 0 0.0]
   gui_nose 1
   color "red"
 
@@ -34,5 +34,5 @@ define carlike_robot position
   wheelbase 0.4 # distance between both axles
   
   # spawn sensors
-  laser(pose [ -0.1 0.0 -0.11 0.0 ])
+  laser(pose [0 0 0 0.0])
 )
