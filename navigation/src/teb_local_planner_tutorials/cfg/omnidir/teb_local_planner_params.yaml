@@ -105,3 +105,6 @@ TebLocalPlannerROS:
  oscillation_omega_eps: 0.1
  oscillation_recovery_min_duration: 10
  oscillation_filter_duration: 10
+
+
+ feasibility_check_lookahead_distance: 10

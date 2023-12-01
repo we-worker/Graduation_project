@@ -58,6 +58,9 @@
 #include "g2o/solvers/cholmod/linear_solver_cholmod.h"
 
 
+#include <teb_local_planner/dyp_control.h>
+int dyp_no_infeasible_plans_=0;
+
 // register this planner both as a BaseLocalPlanner and as a MBF's CostmapController plugin
 PLUGINLIB_EXPORT_CLASS(teb_local_planner::TebLocalPlannerROS, nav_core::BaseLocalPlanner)
 PLUGINLIB_EXPORT_CLASS(teb_local_planner::TebLocalPlannerROS, mbf_costmap_core::CostmapController)
@@ -409,6 +412,7 @@ uint32_t TebLocalPlannerROS::computeVelocityCommands(const geometry_msgs::PoseSt
     ROS_WARN("TebLocalPlannerROS: trajectory is not feasible. Resetting planner...");
     
     ++no_infeasible_plans_; // 增加连续无法实现的解决方案的数量
+    dyp_no_infeasible_plans_++;
     time_last_infeasible_plan_ = ros::Time::now();
     last_cmd_ = cmd_vel.twist;
     message = "teb_local_planner trajectory is not feasible";
@@ -471,6 +475,7 @@ uint32_t TebLocalPlannerROS::computeVelocityCommands(const geometry_msgs::PoseSt
   
   // a feasible solution should be found, reset counter
   no_infeasible_plans_ = 0;
+  dyp_no_infeasible_plans_=0;
   
   // store last command (for recovery analysis etc.)
   last_cmd_ = cmd_vel.twist;

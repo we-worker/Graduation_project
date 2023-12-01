@@ -39,7 +39,8 @@
 #include <teb_local_planner/timed_elastic_band.h>
 
 #include <limits>
-
+#include <teb_local_planner/dyp_control.h>
+extern int dyp_no_infeasible_plans_;
 namespace teb_local_planner
 {
 
@@ -452,14 +453,25 @@ bool TimedElasticBand::initTrajectoryToGoal(const std::vector<geometry_msgs::Pos
          Eigen::Vector2d planpoint_to_goal = goal.position()-plani.position();
       double dir_to_goal2 = std::atan2(planpoint_to_goal[1],planpoint_to_goal[0]); // 方向到目标
 
+
       // 创建一个中间位姿
-      PoseSE2 intermediate_pose(plan[i].pose.position.x, plan[i].pose.position.y, start.theta());
+      PoseSE2 intermediate_pose;
+      if (dyp_no_infeasible_plans_<3 || dyp_no_infeasible_plans_>=6)//找不到路径多次
+      {
+        intermediate_pose = PoseSE2(plan[i].pose.position.x, plan[i].pose.position.y, start.theta());
+      }else{
+        intermediate_pose = PoseSE2(plan[i].pose.position.x, plan[i].pose.position.y, dir_to_goal2);
+      }
+     
+      
       // 估计从上一个位姿到这个中间位姿的时间差
       double dt = estimateDeltaT(BackPose(), intermediate_pose, max_vel_x, max_vel_theta);
       // 将这个中间位姿和时间差添加到列表中
       addPoseAndTimeDiff(intermediate_pose, dt);
     }
     
+
+    // PoseSE2 goal3(BackPose().x(), BackPose().y(), goal.theta);
     // if number of samples is not larger than min_samples, insert manually
     if ( sizePoses() < min_samples-1 )
     {
