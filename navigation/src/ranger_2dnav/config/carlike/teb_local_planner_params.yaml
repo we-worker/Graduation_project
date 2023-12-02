@@ -20,6 +20,7 @@ TebLocalPlannerROS:
   max_vel_y: 0.2 #最大横向速度
   max_vel_theta: 0.2 #最大角速度
   acc_lim_x: 0.5 #最大线加速度
+  acc_lim_y: 0.5
   acc_lim_theta: 0.5 #最大角加速度
 
   # ********************** Carlike robot parameters ********************
@@ -70,10 +71,12 @@ TebLocalPlannerROS:
   penalty_epsilon: 0.1 #惩罚因子
   obstacle_cost_exponent: 4 #障碍物代价指数
   weight_max_vel_x: 2 #最大线速度权重
+  weight_max_vel_y: 2
   weight_max_vel_theta: 1 #最大角速度权重
   weight_acc_lim_x: 1 #线加速度权重
+  weight_acc_lim_y: 1
   weight_acc_lim_theta: 1 #角加速度权重
-  weight_kinematics_nh: 1000 #非完整机器人权重
+  weight_kinematics_nh: 1 #非完整机器人权重
   weight_kinematics_forward_drive: 100 #前向驱动权重
   weight_kinematics_turning_radius: 1 #转弯半径权重
   weight_optimaltime: 1 #时间最优权重，必须大于0
