@@ -46,7 +46,7 @@ TebLocalPlannerROS:
 
  # GoalTolerance
     
- xy_goal_tolerance: 0.1
+ xy_goal_tolerance: 0.05
  yaw_goal_tolerance: 0.1
  free_goal_vel: False
  complete_global_plan: True
@@ -125,3 +125,5 @@ TebLocalPlannerROS:
  oscillation_recovery_min_duration: 10
  oscillation_filter_duration: 10
 
+ feasibility_check_lookahead_distance: 10
+#  min_samples: 5

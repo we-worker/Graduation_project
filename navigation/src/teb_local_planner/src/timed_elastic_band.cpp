@@ -475,11 +475,20 @@ bool TimedElasticBand::initTrajectoryToGoal(const std::vector<geometry_msgs::Pos
     // if number of samples is not larger than min_samples, insert manually
     if ( sizePoses() < min_samples-1 )
     {
-      ROS_DEBUG("initTEBtoGoal(): number of generated samples is less than specified by min_samples. Forcing the insertion of more samples...");
+      ROS_DEBUG("initTEBtoGoal()2: number of generated samples is less than specified by min_samples. Forcing the insertion of more samples...");
       while (sizePoses() < min_samples-1) // subtract goal point that will be added later
       {
+        //   // 创建一个中间位姿
+        // PoseSE2 goal3;
+        // if (dyp_no_infeasible_plans_<3 || dyp_no_infeasible_plans_>=6)//找不到路径多次
+        // {
+        //   goal3 = PoseSE2(goal.position(), start.theta());
+        // }else{
+        //   goal3 = goal;
+        // }
         // simple strategy: interpolate between the current pose and the goal
         PoseSE2 intermediate_pose = PoseSE2::average(BackPose(), goal);
+
         double dt = estimateDeltaT(BackPose(), intermediate_pose, max_vel_x, max_vel_theta);
         addPoseAndTimeDiff( intermediate_pose, dt ); // let the optimier correct the timestep (TODO: better initialization
       }

@@ -112,6 +112,7 @@ bool HomotopyClassPlanner::plan(const PoseSE2& start, const PoseSE2& goal, const
   updateAllTEBs(&start, &goal, start_vel);
 
   // Init new TEBs based on newly explored homotopy classes
+  // PoseSE2 goal_pose(start.position(),goal.theta());
   exploreEquivalenceClassesAndInitTebs(start, goal, cfg_->obstacles.min_obstacle_dist, start_vel, free_goal_vel);
   // update via-points if activated
   updateReferenceTrajectoryViaPoints(cfg_->hcp.viapoints_all_candidates);

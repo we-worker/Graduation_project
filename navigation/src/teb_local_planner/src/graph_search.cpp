@@ -101,7 +101,7 @@ void lrKeyPointGraph::createGraph(const PoseSE2& start, const PoseSE2& goal, dou
 
   if (diff.norm()<cfg_->goal_tolerance.xy_goal_tolerance)
   {
-    ROS_DEBUG("HomotopyClassPlanner::createProbRoadmapGraph(): xy-goal-tolerance already reached.");
+    ROS_DEBUG("HomotopyClassPlanner::createProbRoadmapGraph():1 xy-goal-tolerance already reached.");
     if (hcp_->getTrajectoryContainer().empty())
     {
       ROS_INFO("HomotopyClassPlanner::createProbRoadmapGraph(): Initializing a small straight line to just correct orientation errors.");
@@ -219,17 +219,18 @@ void lrKeyPointGraph::createGraph(const PoseSE2& start, const PoseSE2& goal, dou
 
 void ProbRoadmapGraph::createGraph(const PoseSE2& start, const PoseSE2& goal, double dist_to_obst, double obstacle_heading_threshold, const geometry_msgs::Twist* start_velocity, bool free_goal_vel)
 {
-  // Clear existing graph and paths
+  // 清除现有的图和路径
   clearGraph();
   if((int)hcp_->getTrajectoryContainer().size() >= cfg_->hcp.max_number_classes)
     return;
-  // Direction-vector between start and goal and normal-vector:
+  // 开始和目标之间的方向向量和法向量:
+  // PoseSE2 goal2(goal.position(),start.theta())
   Eigen::Vector2d diff = goal.position()-start.position();
   double start_goal_dist = diff.norm();
 
   if (start_goal_dist<cfg_->goal_tolerance.xy_goal_tolerance)
   {
-    ROS_DEBUG("HomotopyClassPlanner::createProbRoadmapGraph(): xy-goal-tolerance already reached.");
+    ROS_DEBUG("HomotopyClassPlanner::createProbRoadmapGraph():2 xy-goal-tolerance already reached.");
     if (hcp_->getTrajectoryContainer().empty())
     {
       ROS_INFO("HomotopyClassPlanner::createProbRoadmapGraph(): Initializing a small straight line to just correct orientation errors.");
@@ -237,85 +238,67 @@ void ProbRoadmapGraph::createGraph(const PoseSE2& start, const PoseSE2& goal, do
     }
     return;
   }
-  Eigen::Vector2d normal(-diff.coeffRef(1),diff.coeffRef(0)); // normal-vector
+  Eigen::Vector2d normal(-diff.coeffRef(1),diff.coeffRef(0)); // 法向量
   normal.normalize();
 
-  // Now sample vertices between start, goal and a specified width between both sides
-  // Let's start with a square area between start and goal (maybe change it later to something like a circle or whatever)
+  // 现在在开始，目标和两侧之间的指定宽度之间采样顶点
+  // 让我们从开始和目标之间的一个正方形区域开始（可能稍后将其更改为圆形或其他形状）
 
   double area_width = cfg_->hcp.roadmap_graph_area_width;
 
   boost::random::uniform_real_distribution<double> distribution_x(0, start_goal_dist * cfg_->hcp.roadmap_graph_area_length_scale);
   boost::random::uniform_real_distribution<double> distribution_y(0, area_width);
 
-  double phi = atan2(diff.coeffRef(1),diff.coeffRef(0)); // rotate area by this angle
+  double phi = atan2(diff.coeffRef(1),diff.coeffRef(0)); // 旋转区域的角度
   Eigen::Rotation2D<double> rot_phi(phi);
 
   Eigen::Vector2d area_origin;
   if (cfg_->hcp.roadmap_graph_area_length_scale != 1.0)
-    area_origin = start.position() + 0.5*(1.0-cfg_->hcp.roadmap_graph_area_length_scale)*start_goal_dist*diff.normalized() - 0.5*area_width*normal; // bottom left corner of the origin
+    area_origin = start.position() + 0.5*(1.0-cfg_->hcp.roadmap_graph_area_length_scale)*start_goal_dist*diff.normalized() - 0.5*area_width*normal; // 原点的左下角
   else
-    area_origin = start.position() - 0.5*area_width*normal; // bottom left corner of the origin
+    area_origin = start.position() - 0.5*area_width*normal; // 原点的左下角
 
-  // Insert Vertices
-  HcGraphVertexType start_vtx = boost::add_vertex(graph_); // start vertex
+  // 插入顶点
+  HcGraphVertexType start_vtx = boost::add_vertex(graph_); // 开始顶点
   graph_[start_vtx].pos = start.position();
-  diff.normalize(); // normalize in place
+  diff.normalize(); // 原地标准化
 
 
-  // Start sampling
+  // 开始采样
   for (int i=0; i < cfg_->hcp.roadmap_graph_no_samples; ++i)
   {
     Eigen::Vector2d sample;
-//     bool coll_free;
-//     do // sample as long as a collision free sample is found
-//     {
-      // Sample coordinates
-      sample = area_origin + rot_phi*Eigen::Vector2d(distribution_x(rnd_generator_), distribution_y(rnd_generator_));
+    // 采样坐标
+    sample = area_origin + rot_phi*Eigen::Vector2d(distribution_x(rnd_generator_), distribution_y(rnd_generator_));
 
-      // Test for collision
-      // we do not care for collision checking here to improve efficiency, since we perform resampling repeatedly.
-      // occupied vertices are ignored in the edge insertion state since they always violate the edge-obstacle collision check.
-//       coll_free = true;
-//       for (ObstContainer::const_iterator it_obst = obstacles_->begin(); it_obst != obstacles_->end(); ++it_obst)
-//       {
-//         if ( (*it_obst)->checkCollision(sample, dist_to_obst)) // TODO really keep dist_to_obst here?
-//         {
-//           coll_free = false;
-//           break;
-//         }
-//       }
-//
-//     } while (!coll_free && ros::ok());
-
-    // Add new vertex
+    // 添加新的顶点
     HcGraphVertexType v = boost::add_vertex(graph_);
     graph_[v].pos = sample;
   }
 
-  // Now add goal vertex
-  HcGraphVertexType goal_vtx = boost::add_vertex(graph_); // goal vertex
+  // 现在添加目标顶点
+  HcGraphVertexType goal_vtx = boost::add_vertex(graph_); // 目标顶点
   graph_[goal_vtx].pos = goal.position();
 
 
-  // Insert Edges
+  // 插入边
   HcGraphVertexIterator it_i, end_i, it_j, end_j;
-  for (boost::tie(it_i,end_i) = boost::vertices(graph_); it_i!=boost::prior(end_i); ++it_i) // ignore goal in this loop
+  for (boost::tie(it_i,end_i) = boost::vertices(graph_); it_i!=boost::prior(end_i); ++it_i) // 在这个循环中忽略目标
   {
-    for (boost::tie(it_j,end_j) = boost::vertices(graph_); it_j!=end_j; ++it_j) // check all forward connections
+    for (boost::tie(it_j,end_j) = boost::vertices(graph_); it_j!=end_j; ++it_j) // 检查所有前向连接
     {
-      if (it_i==it_j) // same vertex found
+      if (it_i==it_j) // 找到相同的顶点
         continue;
 
       Eigen::Vector2d distij = graph_[*it_j].pos-graph_[*it_i].pos;
-      distij.normalize(); // normalize in place
+      distij.normalize(); // 原地标准化
 
-      // Check if the direction is backwards:
+      // 检查方向是否向后:
       if (distij.dot(diff)<=obstacle_heading_threshold)
-          continue; // diff is already normalized
+          continue; // diff已经标准化
 
 
-      // Collision Check
+      // 碰撞检查
       bool collision = false;
       for (ObstContainer::const_iterator it_obst = hcp_->obstacles()->begin(); it_obst != hcp_->obstacles()->end(); ++it_obst)
       {
@@ -328,12 +311,12 @@ void ProbRoadmapGraph::createGraph(const PoseSE2& start, const PoseSE2& goal, do
       if (collision)
         continue;
 
-      // Create Edge
+      // 创建边
       boost::add_edge(*it_i,*it_j,graph_);
     }
   }
 
-  /// Find all paths between start and goal!
+  /// 在开始和目标之间找到所有路径！
   std::vector<HcGraphVertexType> visited;
   visited.push_back(start_vtx);
   DepthFirst(graph_,visited,goal_vtx, start.theta(), goal.theta(), start_velocity, free_goal_vel);

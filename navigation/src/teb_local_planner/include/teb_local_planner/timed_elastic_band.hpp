@@ -154,13 +154,15 @@ bool TimedElasticBand::initTrajectoryToGoal(BidirIter path_start, BidirIter path
       else timestep = timestep_vel;
 
       
-      PoseSE2 goal(goal_position, goal_orient);
-      // PoseSE2 goal(goal_position, BackPose().theta());
+      // PoseSE2 goal(goal_position, goal_orient);
+      // PoseSE2 goal(BackPose().position(), goal_orient);
+      PoseSE2 goal(goal_position, start_orient);
+
       
       // if number of samples is not larger than min_samples, insert manually
       if ( sizePoses() < min_samples-1 )
       {
-        ROS_DEBUG("initTEBtoGoal(): number of generated samples is less than specified by min_samples. Forcing the insertion of more samples...");
+        ROS_DEBUG("initTEBtoGoal()1: number of generated samples is less than specified by min_samples. Forcing the insertion of more samples...");
         while (sizePoses() < min_samples-1) // subtract goal point that will be added later
         {
           // Each inserted point bisects the remaining distance. Thus the timestep is also bisected.

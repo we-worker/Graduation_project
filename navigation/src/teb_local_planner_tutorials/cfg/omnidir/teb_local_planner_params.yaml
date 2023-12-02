@@ -108,3 +108,4 @@ TebLocalPlannerROS:
 
 
  feasibility_check_lookahead_distance: 10
+#  min_samples: 100
