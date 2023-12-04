@@ -51,6 +51,7 @@
 #include <teb_local_planner/g2o_types/edge_prefer_rotdir.h>
 
 #include <teb_local_planner/g2o_types/dyp_LinearAndAngularSpeed.h>
+#include <teb_local_planner/dyp_control.h>
 
 #include <memory>
 #include <limits>
@@ -364,20 +365,21 @@ bool TebOptimalPlanner::buildGraph(double weight_multiplier)
   AddEdgesShortestPath(); // 添加最短路径约束
 
 
-  if (cfg_->robot.min_turning_radius == 0 || cfg_->optim.weight_kinematics_turning_radius == 0){
-    AddEdgesKinematicsDiffDrive(); // 添加差分驱动机器人的运动学约束
-  }
-  else{
-    AddEdgesKinematicsCarlike(); // 添加类似汽车的机器人的运动学约束
-  }
+  // if (cfg_->robot.min_turning_radius == 0 || cfg_->optim.weight_kinematics_turning_radius == 0){
+  //   AddEdgesKinematicsDiffDrive(); // 添加差分驱动机器人的运动学约束
+  // }
+  // else{
+  //   AddEdgesKinematicsCarlike(); // 添加类似汽车的机器人的运动学约束
+  // }
   //TODO
+  
   AddEdgesPreferRotDir(); // 添加优先旋转方向约束
 
   if (cfg_->optim.weight_velocity_obstacle_ratio > 0)
     AddEdgesVelocityObstacleRatio(); // 添加速度障碍物比例约束
     
   AddEdgesNoSimultaneousLinearAndAngularSpeed();//线速度y与角速度不能同时为0
-
+  AddEdgesKinematicsFourWheeled();
   return true;  
 }
 
@@ -1160,9 +1162,21 @@ void TebOptimalPlanner::extractVelocity(const PoseSE2& pose1, const PoseSE2& pos
   if (std::abs(omega) >= 0.03) {
     vy = 0;
   }
-  if (std::abs(omega) >= 0.07 && std::abs(vx) <= 0.08) {
+  if (std::abs(omega) > std::abs(vx)) {
     vx = 0;
   }
+  //横向移动限制
+  if(std::abs(vy) >0.1 && std::abs(vx)<0.01){
+    vx=0;
+  }
+  if(at_xy_terget){
+    vx = 0;vy = 0;
+    int n = teb_.sizePoses();
+    PoseSE2 goal=teb_.Pose(n-1);
+    double orientdiff2 = g2o::normalize_theta(goal.theta() - pose1.theta());
+    omega = orientdiff2/dt;
+  }
+
 }
 
 bool TebOptimalPlanner::getVelocityCommand(double& vx, double& vy, double& omega, int look_ahead_poses) const
@@ -1362,6 +1376,32 @@ void TebOptimalPlanner::AddEdgesNoSimultaneousLinearAndAngularSpeed()
     
     optimizer_->addEdge(no_simultaneous_speed_edge);
   }
+}
+
+
+void TebOptimalPlanner::AddEdgesKinematicsFourWheeled()
+{
+  if (cfg_->optim.weight_kinematics_nh==0)
+    return; // if weight equals zero skip adding edges!
+
+  // create edge for satisfiying kinematic constraints
+  Eigen::Matrix<double,5,5> information_kinematics;
+  information_kinematics.fill(0.0);
+  information_kinematics(0, 0) = cfg_->optim.weight_kinematics_nh;
+  information_kinematics(1, 1) = 1;
+  information_kinematics(2, 2) = 1;
+  information_kinematics(3, 3) = 10;
+  information_kinematics(4, 4) = 10;
+  
+  for (int i=0; i < teb_.sizePoses()-1; i++) // ignore twiced start only
+  {
+    EdgeKinematicsFourWheeled* kinematics_edge = new EdgeKinematicsFourWheeled;
+    kinematics_edge->setVertex(0,teb_.PoseVertex(i));
+    kinematics_edge->setVertex(1,teb_.PoseVertex(i+1));      
+    kinematics_edge->setInformation(information_kinematics);
+    kinematics_edge->setTebConfig(*cfg_);
+    optimizer_->addEdge(kinematics_edge);
+  }  
 }
 
 } // namespace teb_local_planner

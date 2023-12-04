@@ -665,7 +665,7 @@ protected:
   
   //TODO DYP
   void AddEdgesNoSimultaneousLinearAndAngularSpeed();
-
+  void AddEdgesKinematicsFourWheeled();
   /**
    * @brief Initialize and configure the g2o sparse optimizer.
    * @return shared pointer to the g2o::SparseOptimizer instance

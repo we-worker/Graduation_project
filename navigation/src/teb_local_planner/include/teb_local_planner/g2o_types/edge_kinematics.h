@@ -232,6 +232,101 @@ public:
 };
 
 
+class EdgeKinematicsFourWheeled : public BaseTebBinaryEdge<5, double, VertexPose, VertexPose>
+{
+public:
+  
+  EdgeKinematicsFourWheeled()
+  {
+      this->setMeasurement(0.);
+      last_deltaS = Eigen::Vector2d::Zero();
+  }
+
+  
+  double calculateAngle(double vx, double vy) {
+    double angle = std::atan2(vy, vx) * 180 / M_PI;
+    if (angle > 90) {
+      angle -= 180;
+    }
+    if (angle < -90) {
+      angle += 180;
+    }
+    return angle;
+  }
+
+
+  void computeError()
+  {
+    ROS_ASSERT_MSG(cfg_, "You must call setTebConfig on EdgeKinematicsFourWheeled()");
+    const VertexPose* conf1 = static_cast<const VertexPose*>(_vertices[0]);
+    const VertexPose* conf2 = static_cast<const VertexPose*>(_vertices[1]);
+    Eigen::Vector2d deltaS = conf2->position() - conf1->position();
+    double angle_diff = g2o::normalize_theta( conf2->theta() - conf1->theta() );
+
+
+        // 非全向约束
+    _error[0] = fabs( ( cos(conf1->theta())+cos(conf2->theta()) ) * deltaS[1] - ( sin(conf1->theta())+sin(conf2->theta()) ) * deltaS[0] );
+// 线速度和角速度不能同时存在
+    if (fabs(deltaS[1]) > 0 && fabs(angle_diff) > 0) {
+      _error[1] = deltaS[1]*deltaS[1];
+    } else {
+      _error[1] = 0;
+    }
+// linear.y 变换要连续，不能突变
+    // if (fabs(deltaS[1] - last_deltaS[1]) > 0) {
+    //   _error[2] = fabs(deltaS[1] - last_deltaS[1])*fabs(deltaS[1] - last_deltaS[1]);
+    // } else {
+    //   _error[2] = 0;
+    // }
+
+
+    
+    double angle_deltaS = calculateAngle(deltaS[0], deltaS[1]);
+    double angle_last_deltaS = calculateAngle(last_deltaS[0], last_deltaS[1]);
+    double angle_diff2 = angle_deltaS - angle_last_deltaS;
+
+    //判定上一时刻如果x变化为0，而角速度存在时，此时如果角速度存在，那么此时刻x应该为零，误差等于此时刻x
+    if (fabs(last_deltaS[0]) <fabs(angle_last_deltaS) && angle_last_deltaS != 0 && angle_deltaS!=0) {
+      _error[2] = deltaS[0]*deltaS[0];
+    }else{
+      _error[2] = 0;
+    }
+
+    //线速度斜移角度变化要连续
+    if (angle_diff2==0 || deltaS[0]==0 || deltaS[1]==0 || last_deltaS[0]==0 || last_deltaS[1]==0 ) {
+      _error[3] = 0;
+    } else {
+      _error[3] = angle_diff2*angle_diff2;
+    }
+
+
+          // 正向驱动约束
+      Eigen::Vector2d angle_vec ( cos(conf1->theta()), sin(conf1->theta()) );	   
+      _error[4] = penaltyBoundFromBelow(deltaS.dot(angle_vec), 0,0);
+        // 角速度angular.z 大于linear.x 时，linear.x只能为0,需要优化
+    // if (deltaS[0]!=0 && fabs(angle_diff) > fabs(deltaS[0])) {
+    //   _error[4] = 1;//(deltaS[0]*deltaS[0])
+    // } else {
+    //   _error[4] = 0;
+    // }
+
+    last_deltaS = deltaS;
+    ROS_ASSERT_MSG(std::isfinite(_error[0]) && std::isfinite(_error[1]) && std::isfinite(_error[2]) && std::isfinite(_error[3]), "EdgeKinematicsFourWheeled::computeError() _error[0]=%f _error[1]=%f _error[2]=%f _error[3]=%f\n",_error[0],_error[1],_error[2],_error[3]);
+  }
+
+
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW   
+
+private:
+    Eigen::Vector2d last_deltaS;
+};
+
+
+
+
+
+
+
 
 } // end namespace
 

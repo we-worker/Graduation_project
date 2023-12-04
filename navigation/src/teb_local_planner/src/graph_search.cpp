@@ -39,6 +39,8 @@
 #include <teb_local_planner/graph_search.h>
 #include <teb_local_planner/homotopy_class_planner.h>
 
+#include <teb_local_planner/dyp_control.h>
+
 namespace teb_local_planner
 {
 
@@ -231,12 +233,15 @@ void ProbRoadmapGraph::createGraph(const PoseSE2& start, const PoseSE2& goal, do
   if (start_goal_dist<cfg_->goal_tolerance.xy_goal_tolerance)
   {
     ROS_DEBUG("HomotopyClassPlanner::createProbRoadmapGraph():2 xy-goal-tolerance already reached.");
+    at_xy_terget = true;
     if (hcp_->getTrajectoryContainer().empty())
     {
       ROS_INFO("HomotopyClassPlanner::createProbRoadmapGraph(): Initializing a small straight line to just correct orientation errors.");
       hcp_->addAndInitNewTeb(start, goal, start_velocity, free_goal_vel);
     }
     return;
+  }else{
+    at_xy_terget = false;
   }
   Eigen::Vector2d normal(-diff.coeffRef(1),diff.coeffRef(0)); // 法向量
   normal.normalize();

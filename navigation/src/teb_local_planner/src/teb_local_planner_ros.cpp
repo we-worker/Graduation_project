@@ -60,6 +60,7 @@
 
 #include <teb_local_planner/dyp_control.h>
 int dyp_no_infeasible_plans_=0;
+bool at_xy_terget=false;
 
 // register this planner both as a BaseLocalPlanner and as a MBF's CostmapController plugin
 PLUGINLIB_EXPORT_CLASS(teb_local_planner::TebLocalPlannerROS, nav_core::BaseLocalPlanner)

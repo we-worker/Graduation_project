@@ -118,8 +118,86 @@ void TebOptimalPlanner::AddEdgesPreferRotDir()
 
 
 
+    阿卡曼车{
+    // 限制最小转弯半径
+    double angle_diff = g2o::normalize_theta( conf2->theta() - conf1->theta() );
+    if (angle_diff == 0)
+      _error[1] = 0; // 直线运动
+    else if (cfg_->trajectory.exact_arc_length) // 使用半径的精确计算
+      _error[1] = penaltyBoundFromBelow(fabs(deltaS.norm()/(2*sin(angle_diff/2))), cfg_->robot.min_turning_radius, 0.0);
+    else
+      _error[1] = penaltyBoundFromBelow(deltaS.norm() / fabs(angle_diff), cfg_->robot.min_turning_radius, 0.0); 
+    }
 
 
+      差分车{
+            // 获取两个顶点的位置
+      const VertexPose* conf1 = static_cast<const VertexPose*>(_vertices[0]);
+      const VertexPose* conf2 = static_cast<const VertexPose*>(_vertices[1]);
+      
+      // 计算两个顶点位置的差值
+      Eigen::Vector2d deltaS = conf2->position() - conf1->position();
+
+      // 非全向约束
+      _error[0] = fabs( ( cos(conf1->theta())+cos(conf2->theta()) ) * deltaS[1] - ( sin(conf1->theta())+sin(conf2->theta()) ) * deltaS[0] );
+
+      // 正向驱动约束
+      Eigen::Vector2d angle_vec ( cos(conf1->theta()), sin(conf1->theta()) );	   
+      _error[1] = penaltyBoundFromBelow(deltaS.dot(angle_vec), 0,0);
+      }
+
+      四舵轮{
+        只能使用conf1、2变量，下面提示的angular、linear变量都只是提示。
+
+        要求角速度angular.z 与线速度linear.y 不能同时存在
+        要求linear.y 变换要连续，不能突变
+        当linear.y 存在时，linear.x 不能变化正负号。
+
+        角速度angular.z 大于linear.x 时，linear.x只能为0
+      }
+
+      四舵轮{
+        // 获取两个顶点的位置
+        const VertexPose* conf1 = static_cast<const VertexPose*>(_vertices[0]);
+        const VertexPose* conf2 = static_cast<const VertexPose*>(_vertices[1]);
+
+        // 计算两个顶点位置的差值
+        Eigen::Vector2d deltaS = conf2->position() - conf1->position();
+
+        // 计算角度差
+        double angle_diff = g2o::normalize_theta( conf2->theta() - conf1->theta() );
+
+        // 线速度和角速度不能同时存在
+        if (fabs(deltaS[1]) > 0 && fabs(angle_diff) > 0) {
+          _error[0] = 1;
+        } else {
+          _error[0] = 0;
+        }
+
+        // linear.y 变换要连续，不能突变
+        if (fabs(deltaS[1] - last_deltaS[1]) > MAX_CHANGE) {
+          _error[1] = 1;
+        } else {
+          _error[1] = 0;
+        }
+
+        // 当linear.y 存在时，linear.x 不能变化正负号
+        if (deltaS[1] != 0 && sign(deltaS[0]) != sign(last_deltaS[0])) {
+          _error[2] = 1;
+        } else {
+          _error[2] = 0;
+        }
+
+        // 角速度angular.z 大于linear.x 时，linear.x只能为0
+        if (fabs(angle_diff) > fabs(deltaS[0])) {
+          _error[3] = 1;
+        } else {
+          _error[3] = 0;
+        }
+
+        // 更新上一次的deltaS
+        last_deltaS = deltaS;
+      }
 
 
 

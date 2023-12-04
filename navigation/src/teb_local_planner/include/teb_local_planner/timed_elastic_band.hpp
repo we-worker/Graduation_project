@@ -154,9 +154,9 @@ bool TimedElasticBand::initTrajectoryToGoal(BidirIter path_start, BidirIter path
       else timestep = timestep_vel;
 
       
-      // PoseSE2 goal(goal_position, goal_orient);
+      PoseSE2 goal(goal_position, goal_orient);
       // PoseSE2 goal(BackPose().position(), goal_orient);
-      PoseSE2 goal(goal_position, start_orient);
+      // PoseSE2 goal(goal_position, start_orient);
 
       
       // if number of samples is not larger than min_samples, insert manually
