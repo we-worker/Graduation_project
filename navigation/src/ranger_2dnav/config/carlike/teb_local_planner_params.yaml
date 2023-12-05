@@ -3,17 +3,17 @@ TebLocalPlannerROS:
   odom_topic: odom #里程计话题名称
   # Trajectory
   teb_autosize: True #自动调整时间分辨率
-  dt_ref: 0.3 #参考时间分辨率
+  dt_ref: 0.5 #参考时间分辨率
   dt_hysteresis: 0.1 #时间分辨率滞后
   max_samples: 500 #最大采样数
   global_plan_overwrite_orientation: True #全局路径方向是否覆盖
-  allow_init_with_backwards_motion: True #是否允许反向运动
+  allow_init_with_backwards_motion: False #是否允许反向运动
   max_global_plan_lookahead_dist: 3.0 #全局路径最大前瞻距离
   global_plan_viapoint_sep: -1 #全局路径中间点间隔
   global_plan_prune_distance: 1 #全局路径修剪距离
   exact_arc_length: False #是否精确计算弧长
-  feasibility_check_no_poses: 30 #可行性检查姿态数
-  publish_feedback: False #是否发布反馈信息
+  feasibility_check_no_poses: 5 #可行性检查姿态数
+  publish_feedback: True #是否发布反馈信息
   # Robot
   max_vel_x: 0.3 #最大线速度
   max_vel_x_backwards: 0.3 #最大后退线速度
@@ -46,7 +46,7 @@ TebLocalPlannerROS:
   xy_goal_tolerance: 0.1 #xy目标容差
   yaw_goal_tolerance: 0.1 #偏航目标容差
   free_goal_vel: False #是否允许自由目标速度
-  complete_global_plan: True #是否完成全局路径
+  complete_global_plan: False #是否完成全局路径
   # Obstacles
       
   min_obstacle_dist: 0.2 #机器人与障碍物之间的最小距离，这个值还必须包括我们机器人的扩展，因为footprint_model设置为“line”。

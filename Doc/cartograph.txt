@@ -20,3 +20,8 @@ rosservice call /write_state "{filename: '${HOME}/Downloads/mymap.pbstream'}"
 #导出成一般导航使用的yaml+pgm
 rosrun cartographer_ros cartographer_pbstream_to_ros_map -map_filestem=${HOME}/Downloads/mymap -pbstream_filename=${HOME}/Downloads/mymap.pbstream -resolution=0.05
 
+
+
+#录制包
+rosbag record -a
+rostopic echo -b 2023-12-04-19-01-29.bag -p /cmd_vel > cmd_vel3.txt

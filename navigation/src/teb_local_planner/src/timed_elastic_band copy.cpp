@@ -417,9 +417,7 @@ bool TimedElasticBand::initTrajectoryToGoal(const std::vector<geometry_msgs::Pos
     PoseSE2 start(plan.front().pose);
     PoseSE2 goal(plan.back().pose);
     
-    Eigen::Vector2d point_to_goal = goal.position()-start.position();
-    double dir_to_goal = std::atan2(point_to_goal[1],point_to_goal[0]); // 方向到目标
-    PoseSE2 goal2(goal.x(), goal.y(), dir_to_goal);
+
     
     addPose(start); // add starting point with given orientation
     setPoseVertexFixed(0,true); // StartConf is a fixed constraint during optimization
@@ -445,6 +443,11 @@ bool TimedElasticBand::initTrajectoryToGoal(const std::vector<geometry_msgs::Pos
         {
             yaw = tf::getYaw(plan[i].pose.orientation);
         }
+
+        Eigen::Vector2d point_to_goal = goal.position()-plan[i].pose.position;
+        double dir_to_goal = std::atan2(point_to_goal[1],point_to_goal[0]); // 方向到目标
+        PoseSE2 goal2(goal.x(), goal.y(), dir_to_goal);
+
         PoseSE2 intermediate_pose(plan[i].pose.position.x, plan[i].pose.position.y, dir_to_goal);
         double dt = estimateDeltaT(BackPose(), intermediate_pose, max_vel_x, max_vel_theta);
         addPoseAndTimeDiff(intermediate_pose, dt);
@@ -464,8 +467,8 @@ bool TimedElasticBand::initTrajectoryToGoal(const std::vector<geometry_msgs::Pos
     }
     
     // Now add final state with given orientation
-    double dt = estimateDeltaT(BackPose(), goal2, max_vel_x, max_vel_theta);
-    addPoseAndTimeDiff(goal2, dt);
+    double dt = estimateDeltaT(BackPose(), goal, max_vel_x, max_vel_theta);
+    addPoseAndTimeDiff(goal, dt);
     setPoseVertexFixed(sizePoses()-1,true); // GoalConf is a fixed constraint during optimization
   }
   else // size!=0

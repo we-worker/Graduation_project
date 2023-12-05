@@ -1117,6 +1117,19 @@ void TebOptimalPlanner::computeCurrentCost(double obst_cost_scale, double viapoi
 }
 
 
+  double calculateAngle(double vx, double vy) {
+    double angle = std::atan2(vy, vx) * 180 / M_PI;
+    if (angle > 90) {
+      angle -= 180;
+    }
+    if (angle < -90) {
+      angle += 180;
+    }
+    return angle;
+  }
+  double vx_last,vy_last = 0;
+
+
 void TebOptimalPlanner::extractVelocity(const PoseSE2& pose1, const PoseSE2& pose2, double dt, double& vx, double& vy, double& omega) const
 {
   if (dt == 0)
@@ -1176,6 +1189,23 @@ void TebOptimalPlanner::extractVelocity(const PoseSE2& pose1, const PoseSE2& pos
     double orientdiff2 = g2o::normalize_theta(goal.theta() - pose1.theta());
     omega = orientdiff2/dt;
   }
+  
+  if(std::abs(vx)<0.0001)
+    vx=0;
+  if(std::abs(vy)<0.0001)
+    vy=0;
+  //限制角度突变
+  double current_angle = calculateAngle(vx, vy); // 计算当前角度
+  double last_angle = calculateAngle(vx_last, vy_last); // 计算当前角度
+  if (std::abs(current_angle - last_angle) > 1 && vx_last!=0 && vy_last!=0 && vx!=0 && vy!=0) { // 如果角度差大于5度
+    vx = vx_last/4;vy = vy_last/4; // 将速度设置为0
+  }
+  vx_last=vx;
+  vy_last=vy;
+  if(std::abs(vx_last)<0.01)
+    vx_last=0;
+  if(std::abs(vy_last)<0.01)
+    vy_last=0;
 
 }
 
@@ -1365,7 +1395,7 @@ void TebOptimalPlanner::AddEdgesNoSimultaneousLinearAndAngularSpeed()
   // create edge for satisfying the constraint that linear and angular speed should not exist at the same time
   Eigen::Matrix<double,1,1> information_no_simultaneous_speed;
   // information_no_simultaneous_speed.fill(cfg_->optim.weight_no_simultaneous_speed);
-  information_no_simultaneous_speed.fill(10000);
+  information_no_simultaneous_speed.fill(0);
 
   for (int i=0; i < teb_.sizePoses()-1; ++i) // apply to all rotations
   {
@@ -1386,18 +1416,25 @@ void TebOptimalPlanner::AddEdgesKinematicsFourWheeled()
 
   // create edge for satisfiying kinematic constraints
   Eigen::Matrix<double,5,5> information_kinematics;
-  information_kinematics.fill(0.0);
+  information_kinematics.fill(0);
   information_kinematics(0, 0) = cfg_->optim.weight_kinematics_nh;
   information_kinematics(1, 1) = 1;
   information_kinematics(2, 2) = 1;
-  information_kinematics(3, 3) = 10;
-  information_kinematics(4, 4) = 10;
+  information_kinematics(3, 3) = 0.01;
+  information_kinematics(4, 4) = 1;
   
   for (int i=0; i < teb_.sizePoses()-1; i++) // ignore twiced start only
   {
     EdgeKinematicsFourWheeled* kinematics_edge = new EdgeKinematicsFourWheeled;
     kinematics_edge->setVertex(0,teb_.PoseVertex(i));
-    kinematics_edge->setVertex(1,teb_.PoseVertex(i+1));      
+    kinematics_edge->setVertex(1,teb_.PoseVertex(i+1));
+    if (i!=0)
+    {
+      kinematics_edge->setVertex(2,teb_.PoseVertex(i-1));      
+    }else{
+      kinematics_edge->setVertex(2,teb_.PoseVertex(i)); 
+    }
+    
     kinematics_edge->setInformation(information_kinematics);
     kinematics_edge->setTebConfig(*cfg_);
     optimizer_->addEdge(kinematics_edge);

@@ -418,15 +418,12 @@ bool TimedElasticBand::initTrajectoryToGoal(const std::vector<geometry_msgs::Pos
     PoseSE2 start(plan.front().pose);
     PoseSE2 goal(plan.back().pose);
     
-    Eigen::Vector2d point_to_goal = goal.position()-start.position();
-    double dir_to_goal = std::atan2(point_to_goal[1],point_to_goal[0]); // 方向到目标
-    PoseSE2 goal2(goal.x(), goal.y(), dir_to_goal);
     
     addPose(start); // add starting point with given orientation
     setPoseVertexFixed(0,true); // StartConf is a fixed constraint during optimization
 
     bool backwards = false;
-    if (guess_backwards_motion && (goal2.position()-start.position()).dot(start.orientationUnitVec()) < 0) // check if the goal is behind the start pose (w.r.t. start orientation)
+    if (guess_backwards_motion && (goal.position()-start.position()).dot(start.orientationUnitVec()) < 0) // check if the goal is behind the start pose (w.r.t. start orientation)
         backwards = true;
     // TODO: dt ~ max_vel_x_backwards for backwards motions
     

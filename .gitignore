@@ -149,3 +149,4 @@ Map_bag_database/902/902.bag
 cartographer/src/mycarto/meshes/fl.dae
 cartographer/src/mycarto/meshes/fr.dae
 cartographer/src/mycarto/meshes/ranger_base.dae
+navigation/src/hit_nav

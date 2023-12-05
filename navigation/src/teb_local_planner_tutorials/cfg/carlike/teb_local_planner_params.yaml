@@ -4,17 +4,17 @@ TebLocalPlannerROS:
     
   # Trajectory
   teb_autosize: True #自动调整时间分辨率
-  dt_ref: 0.3 #参考时间分辨率
+  dt_ref: 0.5 #参考时间分辨率
   dt_hysteresis: 0.1 #时间分辨率滞后
   max_samples: 500 #最大采样数
   global_plan_overwrite_orientation: True #全局路径方向是否覆盖
-  allow_init_with_backwards_motion: True #是否允许反向运动
+  allow_init_with_backwards_motion: False #是否允许反向运动
   max_global_plan_lookahead_dist: 3.0 #全局路径最大前瞻距离
-  global_plan_viapoint_sep: -1 #全局路径中间点间隔
+  global_plan_viapoint_sep: -0.5 #全局路径中间点间隔
   global_plan_prune_distance: 1 #全局路径修剪距离
   exact_arc_length: False #是否精确计算弧长
-  feasibility_check_no_poses: 30 #可行性检查姿态数
-  publish_feedback: False #是否发布反馈信息
+  feasibility_check_no_poses: 5 #可行性检查姿态数
+  publish_feedback: True #是否发布包含完整轨迹和活动障碍物的反馈
     
  # Robot
          
@@ -48,7 +48,7 @@ TebLocalPlannerROS:
   xy_goal_tolerance: 0.1
   yaw_goal_tolerance: 0.1
   free_goal_vel: False
-  complete_global_plan: True #是否完成全局路径
+  complete_global_plan: False #是否完成全局路径
       
  # Obstacles
     
@@ -79,7 +79,7 @@ TebLocalPlannerROS:
   weight_acc_lim_x: 1 #线加速度权重
   weight_acc_lim_y: 1
   weight_acc_lim_theta: 1 #角加速度权重
-  weight_kinematics_nh: 1 #非完整机器人权重
+  weight_kinematics_nh: 1 #非全向机器人权重
   weight_kinematics_forward_drive: 100 #前向驱动权重
   weight_kinematics_turning_radius: 1 #转弯半径权重
   weight_optimaltime: 1 #时间最优权重，必须大于0
@@ -94,7 +94,7 @@ TebLocalPlannerROS:
   # Homotopy Class Planner
   #
   enable_homotopy_class_planning: True #是否启用同伦类规划
-  enable_multithreading: True #是否启用多线程
+  enable_multithreading: False #是否启用多线程
   max_number_classes: 4 #最大类数
   selection_cost_hysteresis: 1.0 #代价滞后
   selection_prefer_initial_plan: 0.95 #首选初始路径
