@@ -426,7 +426,7 @@ bool TimedElasticBand::initTrajectoryToGoal(const std::vector<geometry_msgs::Pos
     setPoseVertexFixed(0,true); // StartConf is a fixed constraint during optimization
 
     bool backwards = false;
-    if (guess_backwards_motion && (goal2.position()-start.position()).dot(start.orientationUnitVec()) < 0) // check if the goal is behind the start pose (w.r.t. start orientation)
+    if (guess_backwards_motion && (goal.position()-start.position()).dot(start.orientationUnitVec()) < 0) // check if the goal is behind the start pose (w.r.t. start orientation)
         backwards = true;
     // TODO: dt ~ max_vel_x_backwards for backwards motions
     
@@ -456,12 +456,12 @@ bool TimedElasticBand::initTrajectoryToGoal(const std::vector<geometry_msgs::Pos
 
       // 创建一个中间位姿
       PoseSE2 intermediate_pose;
-      if (dyp_no_infeasible_plans_<3 || dyp_no_infeasible_plans_>=6)//找不到路径多次
-      {
-        intermediate_pose = PoseSE2(plan[i].pose.position.x, plan[i].pose.position.y, start.theta());
-      }else{
-        intermediate_pose = PoseSE2(plan[i].pose.position.x, plan[i].pose.position.y, dir_to_goal2);
-      }
+      // if (dyp_no_infeasible_plans_<3 || dyp_no_infeasible_plans_>=6)//找不到路径多次
+      // {
+      //   intermediate_pose = PoseSE2(plan[i].pose.position.x, plan[i].pose.position.y, start.theta());
+      // }else{
+        intermediate_pose = PoseSE2(plan[i].pose.position.x, plan[i].pose.position.y, yaw);
+      // }
      
       
       // 估计从上一个位姿到这个中间位姿的时间差

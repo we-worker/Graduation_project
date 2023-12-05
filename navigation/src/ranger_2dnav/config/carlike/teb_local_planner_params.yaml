@@ -7,7 +7,7 @@ TebLocalPlannerROS:
   dt_hysteresis: 0.1 #时间分辨率滞后
   max_samples: 500 #最大采样数
   global_plan_overwrite_orientation: True #全局路径方向是否覆盖
-  allow_init_with_backwards_motion: True #是否允许反向运动
+  allow_init_with_backwards_motion: False #是否允许反向运动
   max_global_plan_lookahead_dist: 3.0 #全局路径最大前瞻距离
   global_plan_viapoint_sep: -1 #全局路径中间点间隔
   global_plan_prune_distance: 1 #全局路径修剪距离
@@ -43,8 +43,8 @@ TebLocalPlannerROS:
 
 # GoalTolerance
 
-  xy_goal_tolerance: 0.1 #xy目标容差
-  yaw_goal_tolerance: 0.1 #偏航目标容差
+  xy_goal_tolerance: 0.2 #xy目标容差
+  yaw_goal_tolerance: 0.2 #偏航目标容差
   free_goal_vel: False #是否允许自由目标速度
   complete_global_plan: True #是否完成全局路径
   # Obstacles
@@ -71,13 +71,13 @@ TebLocalPlannerROS:
   penalty_epsilon: 0.1 #惩罚因子
   obstacle_cost_exponent: 4 #障碍物代价指数
   weight_max_vel_x: 2 #最大线速度权重
-  weight_max_vel_y: 2
+  weight_max_vel_y: 0
   weight_max_vel_theta: 1 #最大角速度权重
   weight_acc_lim_x: 1 #线加速度权重
-  weight_acc_lim_y: 1
+  weight_acc_lim_y: 0
   weight_acc_lim_theta: 1 #角加速度权重
-  weight_kinematics_nh: 1 #非完整机器人权重
-  weight_kinematics_forward_drive: 100 #前向驱动权重
+  weight_kinematics_nh: 1000 #非完整机器人权重
+  weight_kinematics_forward_drive: 1000 #前向驱动权重
   weight_kinematics_turning_radius: 1 #转弯半径权重
   weight_optimaltime: 1 #时间最优权重，必须大于0
   weight_shortest_path: 1 #最短路径权重

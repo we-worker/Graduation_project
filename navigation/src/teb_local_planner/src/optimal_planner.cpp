@@ -365,12 +365,12 @@ bool TebOptimalPlanner::buildGraph(double weight_multiplier)
   AddEdgesShortestPath(); // 添加最短路径约束
 
 
-  // if (cfg_->robot.min_turning_radius == 0 || cfg_->optim.weight_kinematics_turning_radius == 0){
-  //   AddEdgesKinematicsDiffDrive(); // 添加差分驱动机器人的运动学约束
-  // }
-  // else{
-  //   AddEdgesKinematicsCarlike(); // 添加类似汽车的机器人的运动学约束
-  // }
+  if (cfg_->robot.min_turning_radius == 0 || cfg_->optim.weight_kinematics_turning_radius == 0){
+    AddEdgesKinematicsDiffDrive(); // 添加差分驱动机器人的运动学约束
+  }
+  else{
+    AddEdgesKinematicsCarlike(); // 添加类似汽车的机器人的运动学约束
+  }
   //TODO
   
   AddEdgesPreferRotDir(); // 添加优先旋转方向约束
@@ -379,7 +379,7 @@ bool TebOptimalPlanner::buildGraph(double weight_multiplier)
     AddEdgesVelocityObstacleRatio(); // 添加速度障碍物比例约束
     
   AddEdgesNoSimultaneousLinearAndAngularSpeed();//线速度y与角速度不能同时为0
-  AddEdgesKinematicsFourWheeled();
+  // AddEdgesKinematicsFourWheeled();
   return true;  
 }
 
@@ -1390,7 +1390,7 @@ void TebOptimalPlanner::AddEdgesKinematicsFourWheeled()
   information_kinematics(0, 0) = cfg_->optim.weight_kinematics_nh;
   information_kinematics(1, 1) = 1;
   information_kinematics(2, 2) = 1;
-  information_kinematics(3, 3) = 10;
+  information_kinematics(3, 3) = 0;
   information_kinematics(4, 4) = 10;
   
   for (int i=0; i < teb_.sizePoses()-1; i++) // ignore twiced start only
