@@ -291,13 +291,13 @@ namespace teb_local_planner
       }
 
       // 线速度斜移角度变化要连续
-      if (fabs(angle_diff2) <= 4 || deltaS[0] == 0 || deltaS[1] == 0 || last_deltaS[0] == 0 || last_deltaS[1] == 0)
+      if ( deltaS[0] == 0 || deltaS[1] == 0 || last_deltaS[0] == 0 || last_deltaS[1] == 0)
       {
         _error[3] = 0;
       }
       else
       {
-        _error[3] = angle_diff2 * angle_diff2;
+        _error[3] = angle_diff2/deltaS.norm() ;
       }
 
       // 正向驱动约束

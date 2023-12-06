@@ -4,7 +4,7 @@ TebLocalPlannerROS:
     
   # Trajectory
   teb_autosize: True #自动调整时间分辨率
-  dt_ref: 0.5 #参考时间分辨率
+  dt_ref: 0.3 #参考时间分辨率
   dt_hysteresis: 0.1 #时间分辨率滞后
   max_samples: 500 #最大采样数
   global_plan_overwrite_orientation: True #全局路径方向是否覆盖
@@ -71,7 +71,7 @@ TebLocalPlannerROS:
   no_outer_iterations: 4 #外部迭代次数
   optimization_activate: True #是否激活优化
   optimization_verbose: False #优化详细信息
-  penalty_epsilon: 0.1 #惩罚因子
+  penalty_epsilon: 1 #惩罚因子
   obstacle_cost_exponent: 4 #障碍物代价指数
   weight_max_vel_x: 2 #最大线速度权重
   weight_max_vel_y: 2
@@ -109,7 +109,7 @@ TebLocalPlannerROS:
   h_signature_threshold: 0.1 #H-signature阈值
   obstacle_heading_threshold: 0.45 #障碍物方向阈值
   switching_blocking_period: 0.0 #切换阻塞时间
-  viapoints_all_candidates: True #是否考虑所有中间点
+  viapoints_all_candidates: False #是否考虑所有中间点
   delete_detours_backwards: True #是否删除后退的绕路
   max_ratio_detours_duration_best_duration: 3.0 #最大绕路时间与最优时间比率
   visualize_hc_graph: False #是否可视化同伦类图

@@ -378,7 +378,7 @@ bool TebOptimalPlanner::buildGraph(double weight_multiplier)
   if (cfg_->optim.weight_velocity_obstacle_ratio > 0)
     AddEdgesVelocityObstacleRatio(); // 添加速度障碍物比例约束
     
-  AddEdgesNoSimultaneousLinearAndAngularSpeed();//线速度y与角速度不能同时为0
+  // AddEdgesNoSimultaneousLinearAndAngularSpeed();//线速度y与角速度不能同时为0
   AddEdgesKinematicsFourWheeled();
   return true;  
 }
