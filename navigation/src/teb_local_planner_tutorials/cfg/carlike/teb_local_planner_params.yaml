@@ -127,4 +127,9 @@ TebLocalPlannerROS:
   oscillation_filter_duration: 10 #振荡滤波时间
 
   feasibility_check_lookahead_distance: 10
-  #  min_samples: 5
+  #  min_samples: 
+
+  dyp_info2: 1
+  dyp_info1: 1
+  dyp_info3: 0.1
+  dyp_info4: 1

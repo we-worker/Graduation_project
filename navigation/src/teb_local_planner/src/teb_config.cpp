@@ -176,7 +176,13 @@ void TebConfig::loadRosParamFromNodeHandle(const ros::NodeHandle& nh)
   nh.param("oscillation_recovery_min_duration", recovery.oscillation_recovery_min_duration, recovery.oscillation_recovery_min_duration);
   nh.param("oscillation_filter_duration", recovery.oscillation_filter_duration, recovery.oscillation_filter_duration);
   nh.param("divergence_detection", recovery.divergence_detection_enable, recovery.divergence_detection_enable);
-  nh.param("divergence_detection_max_chi_squared", recovery.divergence_detection_max_chi_squared, recovery.divergence_detection_max_chi_squared);
+  
+  
+  nh.param("dyp_info1",optim.dyp_info1, optim.dyp_info1);
+  nh.param("dyp_info2",optim.dyp_info2, optim.dyp_info2);
+  nh.param("dyp_info3",optim.dyp_info3, optim.dyp_info3);
+  nh.param("dyp_info4",optim.dyp_info4, optim.dyp_info4);
+
 
   checkParameters();
   checkDeprecated(nh);
@@ -298,6 +304,12 @@ void TebConfig::reconfigure(TebLocalPlannerReconfigureConfig& cfg)
   recovery.oscillation_recovery = cfg.oscillation_recovery;
   recovery.divergence_detection_enable = cfg.divergence_detection_enable;
   recovery.divergence_detection_max_chi_squared = cfg.divergence_detection_max_chi_squared;
+
+  optim.dyp_info1 = cfg.dyp_info1;
+  optim.dyp_info2 = cfg.dyp_info2;
+  optim.dyp_info3 = cfg.dyp_info3;
+  optim.dyp_info4 = cfg.dyp_info4;
+
 
   
   checkParameters();

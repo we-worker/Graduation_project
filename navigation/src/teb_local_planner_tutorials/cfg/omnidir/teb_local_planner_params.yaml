@@ -73,6 +73,11 @@ TebLocalPlannerROS:
  weight_viapoint: 1
  weight_adapt_factor: 2
 
+ dyp_info2: 1
+ dyp_info1: 1
+ dyp_info3: 0.1
+ dyp_info4: 1
+
  # Homotopy Class Planner
 
  enable_homotopy_class_planning: True

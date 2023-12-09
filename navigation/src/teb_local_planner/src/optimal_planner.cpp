@@ -1418,10 +1418,10 @@ void TebOptimalPlanner::AddEdgesKinematicsFourWheeled()
   Eigen::Matrix<double,5,5> information_kinematics;
   information_kinematics.fill(0);
   information_kinematics(0, 0) = cfg_->optim.weight_kinematics_nh;
-  information_kinematics(1, 1) = 1;
-  information_kinematics(2, 2) = 1;
-  information_kinematics(3, 3) = 0.01;
-  information_kinematics(4, 4) = 1;
+  information_kinematics(1, 1) = cfg_->optim.dyp_info1;
+  information_kinematics(2, 2) = cfg_->optim.dyp_info2;
+  information_kinematics(3, 3) = cfg_->optim.dyp_info3;
+  information_kinematics(4, 4) = cfg_->optim.dyp_info4;
   
   for (int i=0; i < teb_.sizePoses()-1; i++) // ignore twiced start only
   {
