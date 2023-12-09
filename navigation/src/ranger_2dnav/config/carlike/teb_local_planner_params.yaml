@@ -4,7 +4,7 @@ TebLocalPlannerROS:
   # Trajectory
   teb_autosize: True #自动调整时间分辨率
   dt_ref: 0.3 #参考时间分辨率
-  dt_hysteresis: 0.1 #时间分辨率滞后
+  dt_hysteresis: 0.03 #时间分辨率滞后
   max_samples: 500 #最大采样数
   global_plan_overwrite_orientation: True #全局路径方向是否覆盖
   allow_init_with_backwards_motion: False #是否允许反向运动
@@ -15,13 +15,13 @@ TebLocalPlannerROS:
   feasibility_check_no_poses: 30 #可行性检查姿态数
   publish_feedback: False #是否发布反馈信息
   # Robot
-  max_vel_x: 0.3 #最大线速度
+  max_vel_x: 1 #最大线速度
   max_vel_x_backwards: 0.3 #最大后退线速度
-  max_vel_y: 0.3 #最大横向速度
-  max_vel_theta: 0.5 #最大角速度
-  acc_lim_x: 0.5 #最大线加速度
-  acc_lim_y: 0.5
-  acc_lim_theta: 0.5 #最大角加速度
+  max_vel_y: 1 #最大横向速度
+  max_vel_theta: 1 #最大角速度
+  acc_lim_x: 0.2 #最大线加速度
+  acc_lim_y: 0.2
+  acc_lim_theta: 0.2 #最大角加速度
 
   # ********************** Carlike robot parameters ********************
   # min_turning_radius: 0.810 #最小转弯半径
@@ -45,8 +45,8 @@ TebLocalPlannerROS:
 
   xy_goal_tolerance: 0.2 #xy目标容差
   yaw_goal_tolerance: 0.2 #偏航目标容差
-  free_goal_vel: False #是否允许自由目标速度
-  complete_global_plan: True #是否完成全局路径
+  free_goal_vel: True #是否允许自由目标速度
+  complete_global_plan: False #是否完成全局路径
   # Obstacles
       
   min_obstacle_dist: 0.2 #机器人与障碍物之间的最小距离，这个值还必须包括我们机器人的扩展，因为footprint_model设置为“line”。
@@ -76,8 +76,8 @@ TebLocalPlannerROS:
   weight_acc_lim_x: 1 #线加速度权重
   weight_acc_lim_y: 0
   weight_acc_lim_theta: 1 #角加速度权重
-  weight_kinematics_nh: 1000 #非完整机器人权重
-  weight_kinematics_forward_drive: 1000 #前向驱动权重
+  weight_kinematics_nh: 100 #非完整机器人权重
+  weight_kinematics_forward_drive: 100 #前向驱动权重
   weight_kinematics_turning_radius: 1 #转弯半径权重
   weight_optimaltime: 1 #时间最优权重，必须大于0
   weight_shortest_path: 1 #最短路径权重
@@ -105,7 +105,7 @@ TebLocalPlannerROS:
   h_signature_threshold: 0.1 #H-signature阈值
   obstacle_heading_threshold: 0.45 #障碍物方向阈值
   switching_blocking_period: 0.0 #切换阻塞时间
-  viapoints_all_candidates: True #是否考虑所有中间点
+  viapoints_all_candidates: False #是否考虑所有中间点
   delete_detours_backwards: True #是否删除后退的绕路
   max_ratio_detours_duration_best_duration: 3.0 #最大绕路时间与最优时间比率
   visualize_hc_graph: False #是否可视化同伦类图
