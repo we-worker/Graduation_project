@@ -82,8 +82,18 @@ options = {
 }
 
 MAP_BUILDER.use_trajectory_builder_2d = true   --对应map_builder.lua文件，这里设置成true.
-TRAJECTORY_BUILDER_2D.num_accumulated_range_data = 4  --每4帧取一帧，防止雷达帧率太高耗费计算资源，可以减少计算量
+TRAJECTORY_BUILDER_2D.num_accumulated_range_data = 1  --每4帧取一帧，防止雷达帧率太高耗费计算资源，可以减少计算量
 TRAJECTORY_BUILDER_2D.use_imu_data = true
+-- TRAJECTORY_BUILDER_2D.motion_filter.max_distance_meters = 0.2
+-- TRAJECTORY_BUILDER_2D.motion_filter.max_angle_radians = math.rad(1.)
+-- TRAJECTORY_BUILDER.pure_localization = true
+
+-- fast localization
+MAP_BUILDER.num_background_threads = 6
+POSE_GRAPH.constraint_builder.sampling_ratio = 1
+POSE_GRAPH.global_sampling_ratio = 0.1 * 5
+POSE_GRAPH.max_num_final_iterations = 1
+
 
 return options
 
