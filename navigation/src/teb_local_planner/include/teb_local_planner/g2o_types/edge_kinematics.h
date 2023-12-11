@@ -273,15 +273,7 @@ namespace teb_local_planner
 
       // 非全向约束
       _error[0] = fabs((cos(conf1->theta()) + cos(conf2->theta())) * deltaS[1] - (sin(conf1->theta()) + sin(conf2->theta())) * deltaS[0]);
-      // 线速度和角速度不能同时存在
-      if (fabs(deltaS[1]) > 0 && fabs(angle_diff) > 0)
-      {
-        _error[1] = deltaS[1] * deltaS[1];
-      }
-      else
-      {
-        _error[1] = 0;
-      }
+
       // linear.y 变换要连续，不能突变
       // if (fabs(deltaS[1] - last_deltaS[1]) > 0) {
       //   _error[2] = fabs(deltaS[1] - last_deltaS[1])*fabs(deltaS[1] - last_deltaS[1]);
@@ -307,6 +299,18 @@ namespace teb_local_planner
       double angle_last_deltaS = calculateAngle(r_dx_old,r_dy_old,angle_diff_old);
       double angle_diff2 = angle_deltaS - angle_last_deltaS;
 
+
+      // 线速度和角速度不能同时存在
+      if (fabs(r_dy) > 0 && fabs(angle_diff) > 0)
+      {
+        _error[1] = r_dy*r_dy;
+      }
+      else
+      {
+        _error[1] = 0;
+      }
+
+
       // 判定上一时刻如果x变化为0，而角速度存在时，此时如果角速度存在 为零，误差等于此时刻x
       if (fabs(r_dx_old) < fabs(angle_last_deltaS) && angle_last_deltaS != 0 && angle_deltaS != 0)
       {
@@ -324,7 +328,7 @@ namespace teb_local_planner
       }
       else
       {
-        _error[3] = angle_diff2;
+        _error[3] = angle_diff2*angle_diff2;
       }
 
       // 正向驱动约束

@@ -4,8 +4,8 @@ TebLocalPlannerROS:
     
   # Trajectory
   teb_autosize: True #自动调整时间分辨率
-  dt_ref: 0.35 #参考时间分辨率
-  dt_hysteresis: 0.06 #时间分辨率滞后
+  dt_ref: 0.5 #参考时间分辨率
+  dt_hysteresis: 0.1 #时间分辨率滞后
   max_samples: 500 #最大采样数
   global_plan_overwrite_orientation: True #全局路径方向是否覆盖
   allow_init_with_backwards_motion: False #是否允许反向运动
@@ -45,8 +45,8 @@ TebLocalPlannerROS:
 
  # GoalTolerance
       
-  xy_goal_tolerance: 0.1
-  yaw_goal_tolerance: 0.1
+  xy_goal_tolerance: 0.2
+  yaw_goal_tolerance: 0.2
   free_goal_vel: False
   complete_global_plan: False #是否完成全局路径
       
@@ -127,9 +127,9 @@ TebLocalPlannerROS:
   oscillation_filter_duration: 10 #振荡滤波时间
 
   feasibility_check_lookahead_distance: 3
-  min_samples: 2
+  min_samples: 1
 
   dyp_info1: 1
   dyp_info2: 1
-  dyp_info3: 0.01
+  dyp_info3: 1
   dyp_info4: 1
