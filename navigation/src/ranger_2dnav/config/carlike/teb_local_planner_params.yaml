@@ -68,7 +68,7 @@ TebLocalPlannerROS:
   no_outer_iterations: 4 #外部迭代次数
   optimization_activate: True #是否激活优化
   optimization_verbose: False #优化详细信息
-  penalty_epsilon: 0.1 #惩罚因子
+  penalty_epsilon: 0.01 #惩罚因子
   obstacle_cost_exponent: 4 #障碍物代价指数
   weight_max_vel_x: 2 #最大线速度权重
   weight_max_vel_y: 2
@@ -123,3 +123,7 @@ TebLocalPlannerROS:
 
   feasibility_check_lookahead_distance: 10
 
+  dyp_info1: 1
+  dyp_info2: 1
+  dyp_info3: 0.01
+  dyp_info4: 1

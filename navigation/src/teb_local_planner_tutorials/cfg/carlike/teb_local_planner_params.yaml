@@ -4,8 +4,8 @@ TebLocalPlannerROS:
     
   # Trajectory
   teb_autosize: True #自动调整时间分辨率
-  dt_ref: 0.3 #参考时间分辨率
-  dt_hysteresis: 0.1 #时间分辨率滞后
+  dt_ref: 0.35 #参考时间分辨率
+  dt_hysteresis: 0.06 #时间分辨率滞后
   max_samples: 500 #最大采样数
   global_plan_overwrite_orientation: True #全局路径方向是否覆盖
   allow_init_with_backwards_motion: False #是否允许反向运动
@@ -71,7 +71,7 @@ TebLocalPlannerROS:
   no_outer_iterations: 4 #外部迭代次数
   optimization_activate: True #是否激活优化
   optimization_verbose: False #优化详细信息
-  penalty_epsilon: 1 #惩罚因子
+  penalty_epsilon: 0.01 #惩罚因子
   obstacle_cost_exponent: 4 #障碍物代价指数
   weight_max_vel_x: 2 #最大线速度权重
   weight_max_vel_y: 2
@@ -94,7 +94,7 @@ TebLocalPlannerROS:
   # Homotopy Class Planner
   #
   enable_homotopy_class_planning: True #是否启用同伦类规划
-  enable_multithreading: False #是否启用多线程
+  enable_multithreading: True #是否启用多线程
   max_number_classes: 4 #最大类数
   selection_cost_hysteresis: 1.0 #代价滞后
   selection_prefer_initial_plan: 0.95 #首选初始路径
@@ -126,10 +126,10 @@ TebLocalPlannerROS:
   oscillation_recovery_min_duration: 10 #振荡恢复的最小持续时间
   oscillation_filter_duration: 10 #振荡滤波时间
 
-  feasibility_check_lookahead_distance: 10
-  #  min_samples: 
+  feasibility_check_lookahead_distance: 3
+  min_samples: 2
 
-  dyp_info2: 1
   dyp_info1: 1
-  dyp_info3: 0.1
+  dyp_info2: 1
+  dyp_info3: 0.01
   dyp_info4: 1

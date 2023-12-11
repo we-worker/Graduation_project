@@ -226,8 +226,8 @@ void ProbRoadmapGraph::createGraph(const PoseSE2& start, const PoseSE2& goal, do
   if((int)hcp_->getTrajectoryContainer().size() >= cfg_->hcp.max_number_classes)
     return;
   // 开始和目标之间的方向向量和法向量:
-  // PoseSE2 goal2(goal.position(),start.theta())
-  Eigen::Vector2d diff = goal.position()-start.position();
+  PoseSE2 goal2(goal.position(),start.theta());
+  Eigen::Vector2d diff = goal2.position()-start.position();
   double start_goal_dist = diff.norm();
 
   if (start_goal_dist<cfg_->goal_tolerance.xy_goal_tolerance)
@@ -237,7 +237,7 @@ void ProbRoadmapGraph::createGraph(const PoseSE2& start, const PoseSE2& goal, do
     if (hcp_->getTrajectoryContainer().empty())
     {
       ROS_INFO("HomotopyClassPlanner::createProbRoadmapGraph(): Initializing a small straight line to just correct orientation errors.");
-      hcp_->addAndInitNewTeb(start, goal, start_velocity, free_goal_vel);
+      hcp_->addAndInitNewTeb(start, goal2, start_velocity, free_goal_vel);
     }
     return;
   }else{
@@ -283,7 +283,7 @@ void ProbRoadmapGraph::createGraph(const PoseSE2& start, const PoseSE2& goal, do
 
   // 现在添加目标顶点
   HcGraphVertexType goal_vtx = boost::add_vertex(graph_); // 目标顶点
-  graph_[goal_vtx].pos = goal.position();
+  graph_[goal_vtx].pos = goal2.position();
 
 
   // 插入边
@@ -324,7 +324,7 @@ void ProbRoadmapGraph::createGraph(const PoseSE2& start, const PoseSE2& goal, do
   /// 在开始和目标之间找到所有路径！
   std::vector<HcGraphVertexType> visited;
   visited.push_back(start_vtx);
-  DepthFirst(graph_,visited,goal_vtx, start.theta(), goal.theta(), start_velocity, free_goal_vel);
+  DepthFirst(graph_,visited,goal_vtx, start.theta(), goal2.theta(), start_velocity, free_goal_vel);
 }
 
 } // end namespace

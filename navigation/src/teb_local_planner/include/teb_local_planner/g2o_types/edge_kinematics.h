@@ -234,7 +234,9 @@ namespace teb_local_planner
       this->setMeasurement(0.);
     }
 
-    double calculateAngle(double vx, double vy)
+
+    //TODO 修改使得，仅有角速度存在时，angle=-90°
+    double calculateAngle(double vx, double vy,double angle_v)
     {
       double angle = std::atan2(vy, vx) * 180 / M_PI;
       if (angle > 90)
@@ -245,6 +247,11 @@ namespace teb_local_planner
       {
         angle += 180;
       }
+
+      if(std::fabs(angle_v)>=0.005){
+        angle=-90;
+      }
+
       return angle;
     }
 
@@ -254,9 +261,15 @@ namespace teb_local_planner
       const VertexPose *conf1 = static_cast<const VertexPose *>(_vertices[0]);
       const VertexPose *conf2 = static_cast<const VertexPose *>(_vertices[1]);
       const VertexPose *conf_old = static_cast<const VertexPose *>(_vertices[2]);
+      //参考加速度部分
+      // const VertexPose* pose3 = static_cast<const VertexPose*>(_vertices[2]);
+      // const VertexTimeDiff* dt1 = static_cast<const VertexTimeDiff*>(_vertices[3]);
+      // const VertexTimeDiff* dt2 = static_cast<const VertexTimeDiff*>(_vertices[4]);
+
       Eigen::Vector2d deltaS = conf2->position() - conf1->position();
       Eigen::Vector2d last_deltaS = conf1->position() - conf_old->position();
       double angle_diff = g2o::normalize_theta(conf2->theta() - conf1->theta());
+      double angle_diff_old = g2o::normalize_theta(conf1->theta() - conf_old->theta());
 
       // 非全向约束
       _error[0] = fabs((cos(conf1->theta()) + cos(conf2->theta())) * deltaS[1] - (sin(conf1->theta()) + sin(conf2->theta())) * deltaS[0]);
@@ -276,14 +289,28 @@ namespace teb_local_planner
       //   _error[2] = 0;
       // }
 
-      double angle_deltaS = calculateAngle(deltaS[0], deltaS[1]);
-      double angle_last_deltaS = calculateAngle(last_deltaS[0], last_deltaS[1]);
+      // 转为机器人坐标系下的角度
+      double cos_theta1 = std::cos(conf1->theta());
+      double sin_theta1 = std::sin(conf1->theta()); 
+      // 将conf2转换为当前机器人框架conf1（逆2d旋转矩阵）
+      double r_dx =  cos_theta1*deltaS.x() + sin_theta1*deltaS.y();
+      double r_dy = -sin_theta1*deltaS.x() + cos_theta1*deltaS.y();
+
+      // 转为机器人坐标系下的角度
+      double cos_theta_old = std::cos(conf1->theta());
+      double sin_theta_old = std::sin(conf1->theta()); 
+      // 将conf2转换为当前机器人框架conf1（逆2d旋转矩阵）
+      double r_dx_old =  cos_theta_old*deltaS.x() + sin_theta_old*deltaS.y();
+      double r_dy_old = -sin_theta_old*deltaS.x() + cos_theta_old*deltaS.y();
+
+      double angle_deltaS = calculateAngle(r_dx, r_dy,angle_diff);
+      double angle_last_deltaS = calculateAngle(r_dx_old,r_dy_old,angle_diff_old);
       double angle_diff2 = angle_deltaS - angle_last_deltaS;
 
-      // 判定上一时刻如果x变化为0，而角速度存在时，此时如果角速度存在，那么此时刻x应该为零，误差等于此时刻x
-      if (fabs(last_deltaS[0]) < fabs(angle_last_deltaS) && angle_last_deltaS != 0 && angle_deltaS != 0)
+      // 判定上一时刻如果x变化为0，而角速度存在时，此时如果角速度存在 为零，误差等于此时刻x
+      if (fabs(r_dx_old) < fabs(angle_last_deltaS) && angle_last_deltaS != 0 && angle_deltaS != 0)
       {
-        _error[2] = deltaS[0] * deltaS[0];
+        _error[2] = r_dx*r_dx;
       }
       else
       {
@@ -291,13 +318,13 @@ namespace teb_local_planner
       }
 
       // 线速度斜移角度变化要连续
-      if ( deltaS[0] == 0 || deltaS[1] == 0 || last_deltaS[0] == 0 || last_deltaS[1] == 0)
+      if (r_dx==0.01 || r_dy == 0.01 || r_dx_old== 0.01 || r_dy_old== 0.01)
       {
         _error[3] = 0;
       }
       else
       {
-        _error[3] = angle_diff2/deltaS.norm() ;
+        _error[3] = angle_diff2;
       }
 
       // 正向驱动约束
@@ -315,8 +342,8 @@ namespace teb_local_planner
       //变化似乎不连续
         // ROS_INFO("conf1=%f,conf1=%f,count_111=%d\n",conf1->position()[0],conf1->position()[1], count_111);
 
-      if (_error[3] * 100 > 1)
-       std::cout << "EdgeKinematicsFourWheeled::computeError()  angle_deltaS=" << angle_deltaS << ",angle_last=" << angle_last_deltaS << ",angle_diff2=" << _error[3] * 100 << std::endl;
+      // if (_error[3] * 100 > 1)
+      //  std::cout << "EdgeKinematicsFourWheeled::computeError()  angle_deltaS=" << angle_deltaS << ",angle_last=" << angle_last_deltaS << ",angle_diff2=" << _error[3] * 100 << std::endl;
      // if (deltaS!=last_deltaS)
       // {
       //   /* code */

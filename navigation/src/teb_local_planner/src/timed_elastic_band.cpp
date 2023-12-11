@@ -376,11 +376,11 @@ bool TimedElasticBand::initTrajectoryToGoal(const PoseSE2& start, const PoseSE2&
       ROS_DEBUG("initTEBtoGoal(): 生成的样本数量少于min_samples指定的数量。强制插入更多样本...");
       while (sizePoses() < min_samples-1) // 减去稍后将添加的目标点
       {
-          // Eigen::Vector2d point_to_goal = goal.position()-BackPose().position();
-          // double dir_to_goal = std::atan2(point_to_goal[1],point_to_goal[0]); // 方向到目标
-          // PoseSE2 goal2(goal.x(), goal.y(), dir_to_goal);
+          Eigen::Vector2d point_to_goal = goal.position()-BackPose().position();
+          double dir_to_goal = std::atan2(point_to_goal[1],point_to_goal[0]); // 方向到目标
+          PoseSE2 goal2(goal.x(), goal.y(), dir_to_goal);
         // 简单策略：在当前姿态和目标之间插值
-        PoseSE2 intermediate_pose = PoseSE2::average(BackPose(), goal);
+        PoseSE2 intermediate_pose = PoseSE2::average(BackPose(), goal2);
         if (max_vel_x > 0) timestep = (intermediate_pose.position()-BackPose().position()).norm()/max_vel_x;
         addPoseAndTimeDiff( intermediate_pose, timestep ); // 让优化器校正时间步长（TODO: 更好的初始化）
       }
