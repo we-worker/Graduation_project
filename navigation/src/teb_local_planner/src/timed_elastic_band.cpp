@@ -369,7 +369,7 @@ bool TimedElasticBand::initTrajectoryToGoal(const PoseSE2& start, const PoseSE2&
       }
 
     }
-    
+
     // 如果样本数量不大于min_samples，则手动插入
     if ( sizePoses() < min_samples-1 )
     {
@@ -476,15 +476,15 @@ bool TimedElasticBand::initTrajectoryToGoal(const std::vector<geometry_msgs::Pos
       while (sizePoses() < min_samples-1) // subtract goal point that will be added later
       {
         //   // 创建一个中间位姿
-        // PoseSE2 goal3;
-        // if (dyp_no_infeasible_plans_<3 || dyp_no_infeasible_plans_>=6)//找不到路径多次
-        // {
-        //   goal3 = PoseSE2(goal.position(), start.theta());
-        // }else{
-        //   goal3 = goal;
-        // }
+        PoseSE2 goal3;
+        if (dyp_no_infeasible_plans_<3 || dyp_no_infeasible_plans_>=6)//找不到路径多次
+        {
+          goal3 = PoseSE2(goal.position(), start.theta());
+        }else{
+          goal3 = goal;
+        }
         // simple strategy: interpolate between the current pose and the goal
-        PoseSE2 intermediate_pose = PoseSE2::average(BackPose(), goal);
+        PoseSE2 intermediate_pose = PoseSE2::average(BackPose(), goal3);
 
         double dt = estimateDeltaT(BackPose(), intermediate_pose, max_vel_x, max_vel_theta);
         addPoseAndTimeDiff( intermediate_pose, dt ); // let the optimier correct the timestep (TODO: better initialization

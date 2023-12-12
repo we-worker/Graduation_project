@@ -7,6 +7,8 @@ footprint: [[-0.3, -0.3], [-0.3, 0.3], [0.3, 0.3], [0.3, -0.3]] #其他形状的
 transform_tolerance: 0.2
 map_type: costmap
 
+
+
 obstacle_layer:
   # Parameters for the obstacle layer of the costmap
   enabled: true

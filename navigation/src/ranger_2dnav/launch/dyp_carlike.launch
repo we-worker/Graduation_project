@@ -21,6 +21,9 @@
   		<rosparam file="$(find ranger_2dnav)/config/carlike/global_costmap_params.yaml" command="load" />
   		<rosparam file="$(find ranger_2dnav)/config/carlike/teb_local_planner_params.yaml" command="load" />
 
+		<!-- Here we load our costmap conversion settings -->
+		<rosparam file="$(find ranger_2dnav)/config/carlike/costmap_converter_params.yaml" command="load" /> 
+
 		<param name="base_global_planner" value="global_planner/GlobalPlanner" />
 		<param name="planner_frequency" value="15.0" />
 		<param name="planner_patience" value="5.0" />
@@ -32,6 +35,13 @@
         <param name="clearing_rotation_allowed" value="false" /> <!-- Our carlike robot is not able to rotate in place -->
 	</node>
 
+
+<!-- ******************* Obstacles ******************* -->
+  <node name="standalone_converter" pkg="costmap_converter" type="standalone_converter" output="screen">
+    <param name="converter_plugin" value="costmap_converter::CostmapToDynamicObstacles" />
+    <param name="costmap_topic" value="/move_base/local_costmap/costmap" />
+    <param name="odom_topic" value="/odom" />
+  </node>
 
 	<!--  ****** Maps *****  -->
 	<!-- <node name="map_server" pkg="map_server" type="map_server" args="$(find teb_local_planner_tutorials)/maps/maze.yaml" output="screen">

@@ -322,7 +322,7 @@ namespace teb_local_planner
       }
 
       // 线速度斜移角度变化要连续
-      if (r_dx==0.01 || r_dy == 0.01 || r_dx_old== 0.01 || r_dy_old== 0.01)
+      if (r_dx==0 || r_dy == 0 || r_dx_old== 0 || r_dy_old== 0)
       {
         _error[3] = 0;
       }
