@@ -53,14 +53,15 @@ TebLocalPlannerROS:
   inflation_dist: 0.4 #膨胀距离
   include_costmap_obstacles: True #是否包括代价地图障碍物
   costmap_obstacles_behind_robot_dist: 1.0 #机器人后面的代价地图障碍物距离
-  obstacle_poses_affected: 15 #障碍物姿态影响
+  obstacle_poses_affected: 30 #障碍物姿态影响
 
   dynamic_obstacle_inflation_dist: 0.6 #动态障碍物膨胀距离
   include_dynamic_obstacles: True #是否包括动态障碍物
 
-  costmap_converter_plugin: "" #代价地图转换插件
-  costmap_converter_spin_thread: True #代价地图转换线程
-  costmap_converter_rate: 5 #代价地图转换速率
+
+  # costmap_converter_plugin: "" #代价地图转换插件
+  # costmap_converter_spin_thread: True #代价地图转换线程
+  # costmap_converter_rate: 5 #代价地图转换速率
 
   # Optimization
         
@@ -125,5 +126,5 @@ TebLocalPlannerROS:
 
   dyp_info1: 1
   dyp_info2: 1
-  dyp_info3: 0.01
+  dyp_info3: 1
   dyp_info4: 1
