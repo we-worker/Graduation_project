@@ -248,8 +248,8 @@ namespace teb_local_planner
         angle += 180;
       }
 
-      if(std::fabs(angle_v)>=0.005){
-        angle=-90;
+      if(std::fabs(angle_v)>=0.01){
+        angle=0;
       }
 
       return angle;
@@ -312,7 +312,7 @@ namespace teb_local_planner
 
 
       // 判定上一时刻如果x变化为0，而角速度存在时，此时如果角速度存在 为零，误差等于此时刻x
-      if (fabs(r_dx_old) < fabs(angle_last_deltaS) && fabs(angle_last_deltaS)<0.01 && fabs(angle_deltaS )<0.01 )
+      if (fabs(r_dx_old) < fabs(angle_last_deltaS) && angle_last_deltaS==0 && angle_deltaS==0 )
       {
         _error[2] = r_dx*r_dx;
       }
@@ -328,7 +328,7 @@ namespace teb_local_planner
       }
       else
       {
-        _error[3] = angle_diff2*angle_diff2;
+        _error[3] = fabs(angle_diff2);
       }
 
       // 正向驱动约束

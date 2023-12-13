@@ -350,7 +350,7 @@ bool TimedElasticBand::initTrajectoryToGoal(const PoseSE2& start, const PoseSE2&
       double dx = diststep*std::cos(dir_to_goal);
       double dy = diststep*std::sin(dir_to_goal);
       double orient_init = dir_to_goal;
-      // 检查目标是否在起始姿态的后方（相对于起始方向）
+            // 检查目标是否在起始姿态的后方（相对于起始方向）
       if (guess_backwards_motion && point_to_goal.dot(start.orientationUnitVec()) < 0) 
         orient_init = g2o::normalize_theta(orient_init+M_PI);
       // TODO: 对于后退运动，timestep ~ max_vel_x_backwards
@@ -492,6 +492,7 @@ bool TimedElasticBand::initTrajectoryToGoal(const std::vector<geometry_msgs::Pos
     }
     
     // Now add final state with given orientation
+    PoseSE2 goal2 = PoseSE2(goal.position(), start.theta());
     double dt = estimateDeltaT(BackPose(), goal, max_vel_x, max_vel_theta);
     addPoseAndTimeDiff(goal, dt);
     setPoseVertexFixed(sizePoses()-1,true); // GoalConf is a fixed constraint during optimization
@@ -505,7 +506,6 @@ bool TimedElasticBand::initTrajectoryToGoal(const std::vector<geometry_msgs::Pos
   
   return true;
 }
-
 
 int TimedElasticBand::findClosestTrajectoryPose(const Eigen::Ref<const Eigen::Vector2d>& ref_point, double* distance, int begin_idx) const
 {
