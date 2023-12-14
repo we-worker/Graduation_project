@@ -248,8 +248,8 @@ namespace teb_local_planner
         angle += 180;
       }
 
-      if(std::fabs(angle_v)>=0.01){
-        angle=0;
+      if(std::fabs(angle_v)>=0.05 && std::fabs(vx)<=0.1  && std::fabs(vy)<=0.1){
+        angle=180;
       }
 
       return angle;
@@ -328,7 +328,7 @@ namespace teb_local_planner
       }
       else
       {
-        _error[3] = fabs(angle_diff2);
+        _error[3] = angle_diff2*angle_diff2;
       }
 
       // 正向驱动约束

@@ -4,8 +4,8 @@ TebLocalPlannerROS:
     
   # Trajectory
   teb_autosize: True #自动调整时间分辨率
-  dt_ref: 0.5 #参考时间分辨率
-  dt_hysteresis: 0.1 #时间分辨率滞后
+  dt_ref: 0.35 #参考时间分辨率
+  dt_hysteresis: 0.05 #时间分辨率滞后
   max_samples: 500 #最大采样数
   global_plan_overwrite_orientation: True #全局路径方向是否覆盖
   allow_init_with_backwards_motion: False #是否允许反向运动
@@ -19,9 +19,9 @@ TebLocalPlannerROS:
  # Robot
          
   max_vel_x: 0.4
-  max_vel_x_backwards: 0.2
+  max_vel_x_backwards: 0.4
   max_vel_y: 0.4
-  max_vel_theta: 0.8 # the angular velocity is also bounded by min_turning_radius in case of a carlike robot (r = v / omega)
+  max_vel_theta: 0.5 # the angular velocity is also bounded by min_turning_radius in case of a carlike robot (r = v / omega)
   acc_lim_x: 0.5
   acc_lim_y: 0.5
   acc_lim_theta: 0.5
@@ -48,7 +48,7 @@ TebLocalPlannerROS:
   xy_goal_tolerance: 0.2
   yaw_goal_tolerance: 0.2
   free_goal_vel: True
-  complete_global_plan: True #是否完成全局路径
+  complete_global_plan: False #是否完成全局路径
       
  # Obstacles
     
@@ -109,7 +109,7 @@ TebLocalPlannerROS:
   h_signature_threshold: 0.1 #H-signature阈值
   obstacle_heading_threshold: 0.45 #障碍物方向阈值
   switching_blocking_period: 0.0 #切换阻塞时间
-  viapoints_all_candidates: False #是否考虑所有中间点
+  viapoints_all_candidates: True #是否考虑所有中间点
   delete_detours_backwards: True #是否删除后退的绕路
   max_ratio_detours_duration_best_duration: 3.0 #最大绕路时间与最优时间比率
   visualize_hc_graph: False #是否可视化同伦类图
@@ -131,5 +131,5 @@ TebLocalPlannerROS:
 
   dyp_info1: 1
   dyp_info2: 1
-  dyp_info3: 0.1
-  dyp_info4: 1
+  dyp_info3: 20
+  dyp_info4: 4

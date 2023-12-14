@@ -1131,7 +1131,6 @@ void TebOptimalPlanner::computeCurrentCost(double obst_cost_scale, double viapoi
   }
   double vx_last,vy_last = 0;
 
-
 void TebOptimalPlanner::extractVelocity(const PoseSE2& pose1, const PoseSE2& pose2, double dt, double& vx, double& vy, double& omega) const
 {
   if (dt == 0)
@@ -1171,18 +1170,21 @@ void TebOptimalPlanner::extractVelocity(const PoseSE2& pose1, const PoseSE2& pos
   
   //TODO 限制y和z不能同时出现
   //限制y和z不能同时出现
-  if (std::abs(omega) < 0.03) {
+  if (std::abs(omega) < 0.03 && vy!=0) {
     omega = 0;
-  }
-  if (std::abs(omega) >= 0.03) {
+  }else if (std::abs(omega) >= std::abs(vy)) {
     vy = 0;
+  }else{
+    omega = 0;
   }
   if (std::abs(omega) > std::abs(vx)) {
     vx = 0;
   }
-  //横向移动限制
-  if(std::abs(vy) >0.1 && std::abs(vx)<0.01){
-    vx=0;
+  //横向移动限制,不能让一会90度一会-90度
+  if(fabs(calculateAngle(vx,vy))>=85 && fabs(calculateAngle(vx_last,vy_last))>=85){
+    if(vx*vx_last<=0){
+      vx=vx_last;
+    }
   }
   if(at_xy_terget){
     vx = 0;vy = 0;
@@ -1192,22 +1194,22 @@ void TebOptimalPlanner::extractVelocity(const PoseSE2& pose1, const PoseSE2& pos
     omega = orientdiff2/dt;
   }
   
-  if(std::abs(vx)<0.0001)
-    vx=0;
+  // if(std::abs(vx)<0.0001)
+  //   vx=0;
   if(std::abs(vy)<0.0001)
     vy=0;
-  //限制角度突变
-  double current_angle = calculateAngle(vx, vy); // 计算当前角度
-  double last_angle = calculateAngle(vx_last, vy_last); // 计算当前角度
-  if (std::abs(current_angle - last_angle) > 1 && vx_last!=0 && vy_last!=0 && vx!=0 && vy!=0) { // 如果角度差大于5度
-    vx = vx_last/4;vy = vy_last/4; // 将速度设置为0
-  }
+  // //限制角度突变
+  // double current_angle = calculateAngle(vx, vy); // 计算当前角度
+  // double last_angle = calculateAngle(vx_last, vy_last); // 计算当前角度
+  // if (std::abs(current_angle - last_angle) > 1 && vx_last!=0 && vy_last!=0 && vx!=0 && vy!=0) { // 如果角度差大于5度
+  //   vx = vx_last/4;vy = vy_last/4; // 将速度设置为0
+  // }
+  // if(std::abs(vx_last)<0.01)
+  //   vx_last=0;
+  // if(std::abs(vy_last)<0.01)
+  //   vy_last=0;
   vx_last=vx;
   vy_last=vy;
-  if(std::abs(vx_last)<0.01)
-    vx_last=0;
-  if(std::abs(vy_last)<0.01)
-    vy_last=0;
 
 }
 
