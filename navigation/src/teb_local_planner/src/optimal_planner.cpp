@@ -1181,7 +1181,8 @@ void TebOptimalPlanner::extractVelocity(const PoseSE2& pose1, const PoseSE2& pos
     vx = 0;
   }
   //横向移动限制,不能让一会90度一会-90度
-  if(fabs(calculateAngle(vx,vy))>=85 && fabs(calculateAngle(vx_last,vy_last))>=85){
+  //if(fabs(calculateAngle(vx,vy))>=70 && fabs(calculateAngle(vx_last,vy_last))>=85){
+  if(fabs(calculateAngle(vx,vy)-calculateAngle(vx_last,vy_last))>=50){
     if(vx*vx_last<=0){
       vx=vx_last;
     }

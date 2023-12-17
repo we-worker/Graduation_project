@@ -12,7 +12,7 @@ TebLocalPlannerROS:
   global_plan_viapoint_sep: -1 #全局路径中间点间隔
   global_plan_prune_distance: 1 #全局路径修剪距离
   exact_arc_length: False #是否精确计算弧长
-  feasibility_check_no_poses: 5 #可行性检查姿态数
+  feasibility_check_no_poses: 15 #可行性检查姿态数
   publish_feedback: True #是否发布反馈信息
   # Robot
   max_vel_x: 0.3 #最大线速度
@@ -45,7 +45,7 @@ TebLocalPlannerROS:
 
   xy_goal_tolerance: 0.2 #xy目标容差
   yaw_goal_tolerance: 0.2 #偏航目标容差
-  free_goal_vel: False #是否允许自由目标速度
+  free_goal_vel: True #是否允许自由目标速度
   complete_global_plan: False #是否完成全局路径
   # Obstacles
       
@@ -78,7 +78,7 @@ TebLocalPlannerROS:
   weight_acc_lim_y: 1
   weight_acc_lim_theta: 1 #角加速度权重
   weight_kinematics_nh: 1 #非完整机器人权重
-  weight_kinematics_forward_drive: 100 #前向驱动权重
+  weight_kinematics_forward_drive: 200 #前向驱动权重
   weight_kinematics_turning_radius: 1 #转弯半径权重
   weight_optimaltime: 1 #时间最优权重，必须大于0
   weight_shortest_path: 1 #最短路径权重
@@ -124,7 +124,7 @@ TebLocalPlannerROS:
 
   feasibility_check_lookahead_distance: 10
 
-  dyp_info1: 1
-  dyp_info2: 1
-  dyp_info3: 1
-  dyp_info4: 1
+  dyp_info1: 2
+  dyp_info2: 2
+  dyp_info3: 500
+  dyp_info4: 4
