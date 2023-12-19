@@ -317,9 +317,9 @@ namespace teb_local_planner
       // 判定上一时刻如果x变化为0，而角速度存在时，此时如果角速度存在 为零，误差等于此时刻x
       // if (angle_last_deltaS!=180 && angle_deltaS==180 )
       if (fabs(r_dx_old) < fabs(angle_last_deltaS) && angle_last_deltaS==0 && angle_deltaS==0 )
+      // if (angle_last_deltaS!=180 && angle_deltaS==180 )
       {
         _error[2] = r_dx*r_dx;
-        // _error[2] = r_dx*r_dx+r_dy*r_dy+r_dx_old*r_dx_old+r_dy_old*r_dy_old;
       }
       else
       {
@@ -327,9 +327,7 @@ namespace teb_local_planner
       }
 
       // 线速度斜移角度变化要连续
-      // if (fabs(r_dx)<0.01 || fabs(r_dy)<0.01 || fabs(r_dx_old)<0.01 || fabs(r_dy_old)<0.01 )
-      if ((r_dx ==0 || r_dy == 0) || (r_dx_old == 0 && r_dy_old == 0) )
-      // if ((r_dx ==0 && r_dy == 0))
+      if (r_dx==0 || r_dy == 0 || r_dx_old== 0 || r_dy_old== 0)
       {
         _error[3] = 0;
       }
@@ -345,34 +343,7 @@ namespace teb_local_planner
           
         // _error[3] = fabs( std::atan2(r_dy, r_dx)-std::atan2(r_dy_old,r_dx_old) );//angle_diff2
 
-        // double angle11 = std::atan2(r_dy, r_dx) * 180 / M_PI;
-        // if (angle11 > 90)
-        // {
-        //   angle11 -= 180;
-        // }
-        // if (angle11 < -90)
-        // {
-        //   angle11 += 180;
-        // }
-        // if((std::fabs(angle_diff)>=0.05 && std::fabs(angle_diff_old)<=0.05)||(std::fabs(angle_diff)<=0.05 && std::fabs(angle_diff_old)>=0.05)){
-        //     _error[3] = 100;
-        // }
 
-        // double angle22 = std::atan2(r_dy_old, r_dx_old) * 180 / M_PI;
-        // if (angle22 > 90)
-        // {
-        //   angle22 -= 180;
-        // }
-        // if (angle22 < -90)
-        // {
-        //   angle22 += 180;
-        // }
-
-        // if(std::fabs(angle_diff_old)>=0.05 && std::fabs(r_dx_old)<=0.1 && std::fabs(r_dy_old)<=0.1){
-        //   angle22=180;
-        // }
-
-        // _error[3] = fabs(angle11-angle22);
 
       }
 
