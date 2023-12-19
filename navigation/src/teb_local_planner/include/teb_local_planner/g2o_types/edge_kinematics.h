@@ -239,18 +239,22 @@ namespace teb_local_planner
     double calculateAngle(double vx, double vy,double angle_v)
     {
       double angle = std::atan2(vy, vx) * 180 / M_PI;
-      if (angle > 90)
-      {
-        angle -= 180;
-      }
-      if (angle < -90)
-      {
-        angle += 180;
-      }
-
-      if(std::fabs(angle_v)>=0.05 && std::fabs(vx)<=0.1  && std::fabs(vy)<=0.1){
+      
+      // if (angle > 90)
+      // {
+      //   angle -= 180;
+      // }
+      // if (angle < -90)
+      // {
+      //   angle += 180;
+      // }
+      
+      if(std::fabs(angle_v)>=0.05 && std::fabs(vx)<=0.1 && std::fabs(vy)<=0.1){
         angle=180;
       }
+      // if(std::fabs(angle_v)>= std::fabs(vy)&&std::fabs(angle_v)>= std::fabs(vx)){
+      //   angle=180;
+      // }
 
       return angle;
     }
@@ -289,16 +293,15 @@ namespace teb_local_planner
       double r_dy = -sin_theta1*deltaS.x() + cos_theta1*deltaS.y();
 
       // 转为机器人坐标系下的角度
-      double cos_theta_old = std::cos(conf1->theta());
-      double sin_theta_old = std::sin(conf1->theta()); 
+      double cos_theta_old = std::cos(conf_old->theta());
+      double sin_theta_old = std::sin(conf_old->theta()); 
       // 将conf2转换为当前机器人框架conf1（逆2d旋转矩阵）
-      double r_dx_old =  cos_theta_old*deltaS.x() + sin_theta_old*deltaS.y();
-      double r_dy_old = -sin_theta_old*deltaS.x() + cos_theta_old*deltaS.y();
+      double r_dx_old =  cos_theta_old*last_deltaS.x() + sin_theta_old*last_deltaS.y();
+      double r_dy_old = -sin_theta_old*last_deltaS.x() + cos_theta_old*last_deltaS.y();
 
-      double angle_deltaS = calculateAngle(r_dx, r_dy,angle_diff);
+      double angle_deltaS = calculateAngle(r_dx, r_dy,angle_diff);                           
       double angle_last_deltaS = calculateAngle(r_dx_old,r_dy_old,angle_diff_old);
       double angle_diff2 = angle_deltaS - angle_last_deltaS;
-
 
       // 线速度和角速度不能同时存在
       if (fabs(r_dy) > 0 && fabs(angle_diff) > 0)
@@ -312,9 +315,11 @@ namespace teb_local_planner
 
 
       // 判定上一时刻如果x变化为0，而角速度存在时，此时如果角速度存在 为零，误差等于此时刻x
+      // if (angle_last_deltaS!=180 && angle_deltaS==180 )
       if (fabs(r_dx_old) < fabs(angle_last_deltaS) && angle_last_deltaS==0 && angle_deltaS==0 )
       {
         _error[2] = r_dx*r_dx;
+        // _error[2] = r_dx*r_dx+r_dy*r_dy+r_dx_old*r_dx_old+r_dy_old*r_dy_old;
       }
       else
       {
@@ -322,13 +327,53 @@ namespace teb_local_planner
       }
 
       // 线速度斜移角度变化要连续
-      if (r_dx==0 || r_dy == 0 || r_dx_old== 0 || r_dy_old== 0)
+      // if (fabs(r_dx)<0.01 || fabs(r_dy)<0.01 || fabs(r_dx_old)<0.01 || fabs(r_dy_old)<0.01 )
+      if ((r_dx ==0 || r_dy == 0) || (r_dx_old == 0 && r_dy_old == 0) )
+      // if ((r_dx ==0 && r_dy == 0))
       {
         _error[3] = 0;
       }
       else
       {
-        _error[3] = angle_diff2*angle_diff2;
+        
+        // _error[3] = fabs(r_dx-r_dx_old)+fabs(r_dy-r_dy_old);//angle_diff2
+          _error[3] =fabs(angle_diff2);
+          if (fabs(angle_diff-angle_diff_old))
+          {
+            /* code */
+          }
+          
+        // _error[3] = fabs( std::atan2(r_dy, r_dx)-std::atan2(r_dy_old,r_dx_old) );//angle_diff2
+
+        // double angle11 = std::atan2(r_dy, r_dx) * 180 / M_PI;
+        // if (angle11 > 90)
+        // {
+        //   angle11 -= 180;
+        // }
+        // if (angle11 < -90)
+        // {
+        //   angle11 += 180;
+        // }
+        // if((std::fabs(angle_diff)>=0.05 && std::fabs(angle_diff_old)<=0.05)||(std::fabs(angle_diff)<=0.05 && std::fabs(angle_diff_old)>=0.05)){
+        //     _error[3] = 100;
+        // }
+
+        // double angle22 = std::atan2(r_dy_old, r_dx_old) * 180 / M_PI;
+        // if (angle22 > 90)
+        // {
+        //   angle22 -= 180;
+        // }
+        // if (angle22 < -90)
+        // {
+        //   angle22 += 180;
+        // }
+
+        // if(std::fabs(angle_diff_old)>=0.05 && std::fabs(r_dx_old)<=0.1 && std::fabs(r_dy_old)<=0.1){
+        //   angle22=180;
+        // }
+
+        // _error[3] = fabs(angle11-angle22);
+
       }
 
       // 正向驱动约束

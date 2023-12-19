@@ -10,10 +10,10 @@ TebLocalPlannerROS:
   global_plan_overwrite_orientation: True #全局路径方向是否覆盖
   allow_init_with_backwards_motion: False #是否允许反向运动
   max_global_plan_lookahead_dist: 3.0 #全局路径最大前瞻距离
-  global_plan_viapoint_sep: -1 #全局路径中间点间隔
+  global_plan_viapoint_sep: 1 #全局路径中间点间隔
   global_plan_prune_distance: 1 #全局路径修剪距离
   exact_arc_length: False #是否精确计算弧长
-  feasibility_check_no_poses: 3 #可行性检查姿态数
+  feasibility_check_no_poses: 30 #可行性检查姿态数
   publish_feedback: False #是否发布包含完整轨迹和活动障碍物的反馈
     
  # Robot
@@ -129,7 +129,7 @@ TebLocalPlannerROS:
   feasibility_check_lookahead_distance: 3
   # min_samples: 1
 
-  dyp_info1: 1
-  dyp_info2: 1
-  dyp_info3: 20
-  dyp_info4: 4
+  dyp_info1: 2
+  dyp_info2: 2
+  dyp_info3: 2
+  dyp_info4: 2
