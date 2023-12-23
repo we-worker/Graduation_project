@@ -7,9 +7,9 @@
   <!-- Base -->
   <link name="base_footprint"/>
   <joint name="base_link_joint" type="fixed">
-    <origin xyz="0 0 -0.32"/>
-    <parent link="base_link"/>
-    <child link="base_footprint"/>
+    <origin xyz="0 0 0.32"/>
+    <parent link="base_footprint"/>
+    <child link="base_link"/>
   </joint>
   <!-- Base link -->
   <link name="base_link">
@@ -23,14 +23,14 @@
       <origin rpy="0 0 0 " xyz="0 0 -0.05"/> #自己添加，减少载入时间
       <geometry>
         <!-- <mesh filename="package://mycarto/meshes/ranger_base.dae"/> -->
-        <box size="0.7 0.35 0.1" /> #自己添加，减少载入时间
+        <box size="0.738 0.5 0.1" /> #自己添加，减少载入时间
       </geometry>
       <material name="gray" /> #自己添加，减少载入时间
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 -0.1"/>
       <geometry>
-        <box size="0.5 0.35 0.2"/>
+        <box size="0.738 0.5 0.338"/>
       </geometry>
     </collision>
   </link>
@@ -300,17 +300,17 @@
     <origin xyz="0.3 0 0" rpy="0 0 1.5708"/>
   </joint>
 
-    <!-- <joint name="imu2robot" type="fixed">
+    <joint name="imu2robot" type="fixed">
     <parent link="base_link" />
     <child link="imu_link" />
-    <origin xyz="-0.3 0 0" rpy="0 0 0"/>
-  </joint> -->
+    <origin xyz="-0.05 0 0" rpy="0 0 0"/>
+  </joint>
 
-    <joint name="imu2laser" type="fixed">
+    <!-- <joint name="imu2laser" type="fixed">
     <parent link="scanner_link" />
     <child link="imu_link" />
     <origin xyz="0 0.35 0" rpy="0 0 -1.5708"/>
-  </joint> 
+  </joint>  -->
 
 
 
