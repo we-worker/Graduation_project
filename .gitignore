@@ -151,3 +151,4 @@ cartographer/src/mycarto/meshes/fr.dae
 cartographer/src/mycarto/meshes/ranger_base.dae
 navigation/src/hit_nav
 Doc/datas/902-data-12-23.bag
+Doc/datas/902-data-lidar-odom-imu.bag

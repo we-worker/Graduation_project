@@ -129,6 +129,8 @@
 
 11. **启动方法**见Doc目录，start.sh文件,start.py文件，注意请关闭sudo 密码
 
+12. **仿真数据集**解压Doc/datas/902-data-lidar-odom-imu.7z
+
 
 
 ## 节点图
