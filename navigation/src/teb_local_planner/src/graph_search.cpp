@@ -226,7 +226,13 @@ void ProbRoadmapGraph::createGraph(const PoseSE2& start, const PoseSE2& goal, do
   if((int)hcp_->getTrajectoryContainer().size() >= cfg_->hcp.max_number_classes)
     return;
   // 开始和目标之间的方向向量和法向量:
-  PoseSE2 goal2(goal.position(),start.theta());
+  PoseSE2 goal2;
+  if(dyp_min_turning_radius!=0){
+    goal2=goal;
+  }else{
+    PoseSE2 goal22(goal.position(),start.theta());
+    goal2=goal22;
+  }
   Eigen::Vector2d diff = goal2.position()-start.position();
   double start_goal_dist = diff.norm();
 

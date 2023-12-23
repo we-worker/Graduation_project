@@ -378,7 +378,13 @@ bool TimedElasticBand::initTrajectoryToGoal(const PoseSE2& start, const PoseSE2&
       {
           Eigen::Vector2d point_to_goal = goal.position()-BackPose().position();
           double dir_to_goal = std::atan2(point_to_goal[1],point_to_goal[0]); // 方向到目标
-          PoseSE2 goal2(goal.x(), goal.y(), dir_to_goal);
+            PoseSE2 goal2;
+          if(dyp_min_turning_radius!=0){
+            goal2=goal;
+          }else{
+            PoseSE2 goal22(goal.x(), goal.y(), dir_to_goal);
+            goal2=goal22;
+          }
         // 简单策略：在当前姿态和目标之间插值
         PoseSE2 intermediate_pose = PoseSE2::average(BackPose(), goal2);
         if (max_vel_x > 0) timestep = (intermediate_pose.position()-BackPose().position()).norm()/max_vel_x;
@@ -457,7 +463,12 @@ bool TimedElasticBand::initTrajectoryToGoal(const std::vector<geometry_msgs::Pos
       {
         intermediate_pose = PoseSE2(plan[i].pose.position.x, plan[i].pose.position.y, start.theta());
       }else{
-        intermediate_pose = PoseSE2(plan[i].pose.position.x, plan[i].pose.position.y, dir_to_goal2);
+          if(dyp_min_turning_radius!=0){
+            intermediate_pose = PoseSE2(plan[i].pose.position.x, plan[i].pose.position.y, yaw);
+          }else{
+            intermediate_pose = PoseSE2(plan[i].pose.position.x, plan[i].pose.position.y, dir_to_goal2);
+          }
+
       }
      
       
@@ -476,15 +487,22 @@ bool TimedElasticBand::initTrajectoryToGoal(const std::vector<geometry_msgs::Pos
       while (sizePoses() < min_samples-1) // subtract goal point that will be added later
       {
         //   // 创建一个中间位姿
-        PoseSE2 goal3;
-        if (dyp_no_infeasible_plans_<3 || dyp_no_infeasible_plans_>=6)//找不到路径多次
-        {
-          goal3 = PoseSE2(goal.position(), start.theta());
-        }else{
-          goal3 = goal;
-        }
+        // PoseSE2 goal3;
+        // if (dyp_no_infeasible_plans_<3 || dyp_no_infeasible_plans_>=6)//找不到路径多次
+        // {
+        //   goal3 = PoseSE2(goal.position(), start.theta());
+        // }else{
+        //   goal3 = goal;
+        // }
+          PoseSE2 goal2;
+          if(dyp_min_turning_radius!=0){
+            goal2=goal;
+          }else{
+            PoseSE2 goal22(goal.x(), goal.y(), start.theta());
+            goal2=goal22;
+          }
         // simple strategy: interpolate between the current pose and the goal
-        PoseSE2 intermediate_pose = PoseSE2::average(BackPose(), goal3);
+        PoseSE2 intermediate_pose = PoseSE2::average(BackPose(), goal2);
 
         double dt = estimateDeltaT(BackPose(), intermediate_pose, max_vel_x, max_vel_theta);
         addPoseAndTimeDiff( intermediate_pose, dt ); // let the optimier correct the timestep (TODO: better initialization
@@ -609,16 +627,17 @@ int TimedElasticBand::findClosestTrajectoryPose(const Obstacle& obstacle, double
 
 void TimedElasticBand::updateAndPruneTEB(boost::optional<const PoseSE2&> new_start, boost::optional<const PoseSE2&> new_goal, int min_samples)
 {
-  // first and simple approach: change only start confs (and virtual start conf for inital velocity)
-  // TEST if optimizer can handle this "hard" placement
+  // 首先和简单的方法：只改变起始配置（和初始速度的虚拟起始配置）
+  // 测试优化器是否能处理这种"硬"放置
 
   if (new_start && sizePoses()>0)
   {    
-    // find nearest state (using l2-norm) in order to prune the trajectory
-    // (remove already passed states)
+    // 找到最近的状态（使用l2-范数）以便修剪轨迹
+    // （删除已经通过的状态）
     double dist_cache = (new_start->position()- Pose(0).position()).norm();
+    // double dist_cache = 0.15;
     double dist;
-    int lookahead = std::min<int>( sizePoses()-min_samples, 10); // satisfy min_samples, otherwise max 10 samples
+    int lookahead = std::min<int>( sizePoses()-min_samples, 10); // 满足min_samples，否则最多10个样本
 
     int nearest_idx = 0;
     for (int i = 1; i<=lookahead; ++i)
@@ -632,16 +651,17 @@ void TimedElasticBand::updateAndPruneTEB(boost::optional<const PoseSE2&> new_sta
       else break;
     }
     
-    // prune trajectory at the beginning (and extrapolate sequences at the end if the horizon is fixed)
+    // 在开始处修剪轨迹（并在末端外推序列，如果视线是固定的）
     if (nearest_idx>0)
     {
-      // nearest_idx is equal to the number of samples to be removed (since it counts from 0 ;-) )
-      // WARNING delete starting at pose 1, and overwrite the original pose(0) with new_start, since Pose(0) is fixed during optimization!
-      deletePoses(1, nearest_idx);  // delete first states such that the closest state is the new first one
-      deleteTimeDiffs(1, nearest_idx); // delete corresponding time differences
+      // nearest_idx等于要删除的样本数（因为它从0开始计数；-））
+      // 警告从pose 1开始删除，并用new_start覆盖原始pose(0)，因为Pose(0)在优化过程中是固定的！
+      deletePoses(1, nearest_idx);  // 删除第一个状态，使最近的状态成为新的第一个状态
+      deleteTimeDiffs(1, nearest_idx); // 删除相应的时间差
+      std::cout << "deletePoses(1, nearest_idx);" << std::endl;
     }
     
-    // update start
+    // 更新开始
     Pose(0) = *new_start;
   }
   

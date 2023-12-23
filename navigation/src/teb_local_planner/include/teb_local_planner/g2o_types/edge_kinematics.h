@@ -234,27 +234,26 @@ namespace teb_local_planner
       this->setMeasurement(0.);
     }
 
-
     //TODO 修改使得，仅有角速度存在时，angle=-90°
     double calculateAngle(double vx, double vy,double angle_v)
     {
       double angle = std::atan2(vy, vx) * 180 / M_PI;
       
-      // if (angle > 90)
-      // {
-      //   angle -= 180;
-      // }
-      // if (angle < -90)
-      // {
-      //   angle += 180;
-      // }
-      
-      if(std::fabs(angle_v)>=0.05 && std::fabs(vx)<=0.1 && std::fabs(vy)<=0.1){
-        angle=180;
+      if (angle > 90)
+      {
+        angle -= 180;
       }
-      // if(std::fabs(angle_v)>= std::fabs(vy)&&std::fabs(angle_v)>= std::fabs(vx)){
+      if (angle < -90)
+      {
+        angle += 180;
+      }
+      
+      // if(std::fabs(angle_v)>=0.05 && std::fabs(vx)<=0.1 && std::fabs(vy)<=0.1){
       //   angle=180;
       // }
+      if(std::fabs(angle_v)>= std::fabs(vy)&&std::fabs(angle_v)>= std::fabs(vx)){
+        angle=180;
+      }
 
       return angle;
     }
@@ -276,8 +275,8 @@ namespace teb_local_planner
       double angle_diff_old = g2o::normalize_theta(conf1->theta() - conf_old->theta());
 
       // 非全向约束
-      _error[0] = fabs((cos(conf1->theta()) + cos(conf2->theta())) * deltaS[1] - (sin(conf1->theta()) + sin(conf2->theta())) * deltaS[0]);
-
+      // _error[0] = fabs((cos(conf1->theta()) + cos(conf2->theta())) * deltaS[1] - (sin(conf1->theta()) + sin(conf2->theta())) * deltaS[0]);
+      _error[0] =0;
       // linear.y 变换要连续，不能突变
       // if (fabs(deltaS[1] - last_deltaS[1]) > 0) {
       //   _error[2] = fabs(deltaS[1] - last_deltaS[1])*fabs(deltaS[1] - last_deltaS[1]);
@@ -327,26 +326,23 @@ namespace teb_local_planner
       }
 
       // 线速度斜移角度变化要连续
-      if (r_dx==0 || r_dy == 0 || r_dx_old== 0 || r_dy_old== 0)
+      // if (r_dx==0 && r_dy == 0 && r_dx_old== 0 && r_dy_old== 0 &&angle_diff==0 &&angle_diff_old==0)
+      if ((r_dx_old== 0 && r_dy_old== 0 && angle_diff_old==0)||(r_dx==0 && r_dy == 0 && angle_diff==0 ))
       {
         _error[3] = 0;
       }
       else
       {
         
-        // _error[3] = fabs(r_dx-r_dx_old)+fabs(r_dy-r_dy_old);//angle_diff2
-          _error[3] =fabs(angle_diff2);
-          if (fabs(angle_diff-angle_diff_old))
-          {
-            /* code */
-          }
-          
-        // _error[3] = fabs( std::atan2(r_dy, r_dx)-std::atan2(r_dy_old,r_dx_old) );//angle_diff2
-
-
+        _error[3] = fabs(r_dx-r_dx_old)+fabs(r_dy-r_dy_old);//angle_diff2
+          // _error[3] =fabs(angle_diff2);
+        // _error[3] = fabs( r_dy/r_dx-r_dy_old/r_dx_old );//angle_diff2
 
       }
-
+      // if (angle_diff == 0)
+      //   _error[3] = 0;                            // 直线运动
+      // else
+      //   _error[3] = penaltyBoundFromBelow(deltaS.norm() / fabs(angle_diff), 810, 0.0);
       // 正向驱动约束
       Eigen::Vector2d angle_vec(cos(conf1->theta()), sin(conf1->theta()));
       _error[4] = penaltyBoundFromBelow(deltaS.dot(angle_vec), 0, 0);
@@ -363,7 +359,7 @@ namespace teb_local_planner
         // ROS_INFO("conf1=%f,conf1=%f,count_111=%d\n",conf1->position()[0],conf1->position()[1], count_111);
 
       // if (_error[3] * 100 > 1)
-      //  std::cout << "EdgeKinematicsFourWheeled::computeError()  angle_deltaS=" << angle_deltaS << ",angle_last=" << angle_last_deltaS << ",angle_diff2=" << _error[3] * 100 << std::endl;
+      //  std::cout << "EdgeKinematicsFourWheeled::computeError()  angle_deltaS=" << angle_deltaS << ",angle_last=" << angle_last_deltaS << ",angle_diff2=" << _error[3] << std::endl;
      // if (deltaS!=last_deltaS)
       // {
       //   /* code */

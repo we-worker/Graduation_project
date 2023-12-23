@@ -25,3 +25,7 @@ rosrun cartographer_ros cartographer_pbstream_to_ros_map -map_filestem=${HOME}/D
 #录制包
 rosbag record -a
 rostopic echo -b 2023-12-04-19-01-29.bag -p /cmd_vel > cmd_vel3.txt
+
+
+
+rosrun rqt_reconfigure rqt_reconfigure

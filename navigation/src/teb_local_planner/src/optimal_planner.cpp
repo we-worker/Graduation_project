@@ -220,6 +220,7 @@ bool TebOptimalPlanner::optimizeTEB(int iterations_innerloop, int iterations_out
     if (!success) 
     {
         clearGraph();
+        // std::cout<<"not success optimizeGraph!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"<<std::endl;
         return false;
     }
     optimized_ = true;
@@ -371,7 +372,7 @@ bool TebOptimalPlanner::buildGraph(double weight_multiplier)
   //   AddEdgesKinematicsDiffDrive(); // 添加差分驱动机器人的运动学约束
   // }
   // else{
-  //   AddEdgesKinematicsCarlike(); // 添加类似汽车的机器人的运动学约束
+    // AddEdgesKinematicsCarlike(); // 添加类似汽车的机器人的运动学约束
   // }
   //TODO
   
@@ -381,7 +382,39 @@ bool TebOptimalPlanner::buildGraph(double weight_multiplier)
     AddEdgesVelocityObstacleRatio(); // 添加速度障碍物比例约束
     
   // AddEdgesNoSimultaneousLinearAndAngularSpeed();//线速度y与角速度不能同时为0
-  AddEdgesKinematicsFourWheeled();
+  // AddEdgesKinematicsFourWheeled();
+    if(dyp_first_judge_Carlike){
+      int n = teb_.sizePoses();
+      PoseSE2 goal=teb_.Pose(n-1);
+      // geometry_msgs::PoseStamped global_goal;
+      // tf2::doTransform(global_plan_.back(), global_goal, tf_plan_to_global);
+      // // double dx = global_goal.pose.position.x - robot_pose_.x();
+      //  PoseSE2 goal=global_goal.pose();
+
+
+      PoseSE2 start=teb_.Pose(0);
+      double orientdiff = g2o::normalize_theta(goal.theta() - start.theta());
+      double dist=(goal.position() - start.position()).norm() ;
+      if(dist<1.5 && orientdiff <0.2){
+        dyp_use_Carlike=false;
+      }else{
+        dyp_use_Carlike=true;
+      }
+      dyp_first_judge_Carlike=false;
+    }
+
+    if(dyp_use_Carlike){
+      dyp_min_turning_radius=0.81;
+      AddEdgesKinematicsCarlike(); // 添加类似汽车的机器人的运动学约束
+    }else{
+      dyp_min_turning_radius=0;
+      AddEdgesKinematicsFourWheeled();
+    }
+    // at_xy_terget考虑结合这个变量，单次导航的时候，固定只能用阿克曼或者只能用四舵轮模型。
+
+
+
+  // std::cout<<"buildGraph!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"<<std::endl;
   return true;  
 }
 
@@ -740,7 +773,7 @@ void TebOptimalPlanner::AddEdgesViaPoints()
 void TebOptimalPlanner::AddEdgesVelocity()
 {
   // 如果机器人的最大y方向速度为0，即为非全向机器人
-  if (cfg_->robot.max_vel_y == 0) 
+  if (cfg_->robot.max_vel_y == 0 || dyp_min_turning_radius!=0) 
   {
     // 如果x方向和角速度的权重都为0，则不添加边
     if ( cfg_->optim.weight_max_vel_x==0 && cfg_->optim.weight_max_vel_theta==0)
@@ -800,7 +833,7 @@ void TebOptimalPlanner::AddEdgesAcceleration()
 
   int n = teb_.sizePoses();  
     
-  if (cfg_->robot.max_vel_y == 0 || cfg_->robot.acc_lim_y == 0) // non-holonomic robot
+  if (cfg_->robot.max_vel_y == 0 || cfg_->robot.acc_lim_y == 0 || dyp_min_turning_radius!=0) // non-holonomic robot
   {
     Eigen::Matrix<double,2,2> information;
     information.fill(0);
@@ -1143,7 +1176,7 @@ void TebOptimalPlanner::extractVelocity(const PoseSE2& pose1, const PoseSE2& pos
   
   Eigen::Vector2d deltaS = pose2.position() - pose1.position();
   
-  if (cfg_->robot.max_vel_y == 0) // nonholonomic robot
+  if (cfg_->robot.max_vel_y == 0 || dyp_min_turning_radius!=0) // nonholonomic robot
   {
     Eigen::Vector2d conf1dir( cos(pose1.theta()), sin(pose1.theta()) );
     // translational velocity
