@@ -170,7 +170,7 @@ Visualization Manager:
       Submap query service: /submap_query
       Submaps:
         All: true
-        All Submap Pose Markers: true
+        All Submap Pose Markers: false
         Trajectory 0:
           0.70: true
           1.70: true

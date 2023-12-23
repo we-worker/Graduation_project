@@ -1,7 +1,6 @@
 <launch>
+<!-- 使用bag数据包时，/use_sim_time需要设置为true，否则会出现时间戳不一致的问题。 -->
   <param name="/use_sim_time" value="false" />
-
-
 
   <param name="robot_description"
     textfile="$(find mycarto)/urdf/ranger_mini_v2.urdf" />

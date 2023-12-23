@@ -1,6 +1,6 @@
 # 使用cartographer+navigation进行建图定位导航
 # 开发中，仅供参考
-![项目图片](./Doc/ranger_mode.png)
+![项目图片](./Doc/介绍图片/ranger_mode.png)
 
 ## 元件清单
 
@@ -17,15 +17,22 @@
 - 导航：使用navigation+teb_local_planner
 - 上位机：QT+socket
 
-## 节点图
 
-![node图片](./Doc/ros_node_graph.png)
-
-![tf图片](./Doc/ros_tf_graph.png)
 
 ## 上位机
 
 ![上位机图片](./QT-host-controller/Doc/效果展示.png)
+
+
+## 效果-亮点展示
+
+主动切换不同运行模式，实现四舵轮模型和阿克曼模型切换
+
+如下图，先为阿克曼模式，后为舵轮斜移模式入库
+
+动图展示见Doc/介绍图片/效果展示-动态2.gif
+![效果展示](./Doc/介绍图片/效果展示-静态.png)
+
 
 ## 更新日志
 
@@ -34,14 +41,8 @@
 - 修改imu为imu_link，机器人为base_link。成功部署carlike
 - 搭建上位机大框架
 - movebase节点添加imu数据
-
-
-## TODO
-
 - 短距和远距模式切换
-
-
-
+- 远距模式使用阿克曼车模，短距模式判断角度是否简单斜移，斜移就四舵轮模型。
 
 
 ## 安装步骤
@@ -127,3 +128,11 @@
     ```
 
 11. **启动方法**见Doc目录，start.sh文件,start.py文件，注意请关闭sudo 密码
+
+
+
+## 节点图
+
+![node图片](./Doc/介绍图片/ros_node_graph.png)
+
+![tf图片](./Doc/介绍图片/ros_tf_graph.png)
