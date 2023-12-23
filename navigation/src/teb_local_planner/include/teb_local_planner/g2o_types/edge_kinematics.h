@@ -50,6 +50,7 @@
 #include <teb_local_planner/teb_config.h>
 
 #include <cmath>
+#include <teb_local_planner/dyp_control.h>
 
 namespace teb_local_planner
 {
@@ -251,9 +252,9 @@ namespace teb_local_planner
       // if(std::fabs(angle_v)>=0.05 && std::fabs(vx)<=0.1 && std::fabs(vy)<=0.1){
       //   angle=180;
       // }
-      if(std::fabs(angle_v)>= std::fabs(vy)&&std::fabs(angle_v)>= std::fabs(vx)){
-        angle=180;
-      }
+      // if(std::fabs(angle_v)>= std::fabs(vy)&&std::fabs(angle_v)>= std::fabs(vx)){
+      //   angle=180;
+      // }
 
       return angle;
     }
@@ -327,18 +328,19 @@ namespace teb_local_planner
 
       // 线速度斜移角度变化要连续
       // if (r_dx==0 && r_dy == 0 && r_dx_old== 0 && r_dy_old== 0 &&angle_diff==0 &&angle_diff_old==0)
-      if ((r_dx_old== 0 && r_dy_old== 0 && angle_diff_old==0)||(r_dx==0 && r_dy == 0 && angle_diff==0 ))
+      if ((r_dx_old== 0 && r_dy_old== 0 && angle_diff_old==0)||(r_dx==0 && r_dy == 0 && angle_diff==0 )
+            || dyp_first_judge_Carlike==true ||at_xy_terget==true)
       {
         _error[3] = 0;
-      }
+       }
       else
       {
         
-        _error[3] = fabs(r_dx-r_dx_old)+fabs(r_dy-r_dy_old);//angle_diff2
-          // _error[3] =fabs(angle_diff2);
+        // _error[3] = fabs(r_dx-r_dx_old)+fabs(r_dy-r_dy_old);//angle_diff2
+          _error[3] =fabs(angle_diff2);
         // _error[3] = fabs( r_dy/r_dx-r_dy_old/r_dx_old );//angle_diff2
-
-      }
+        //  _error[3] = 0;
+        }
       // if (angle_diff == 0)
       //   _error[3] = 0;                            // 直线运动
       // else

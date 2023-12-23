@@ -2,9 +2,9 @@
 <launch>
   <arg name="device" default="R2000"/>
 
-  <arg name="launch_pf_description" default="true"
+  <arg name="launch_pf_description" default="false"
        doc="Whether to include the pf_description bringup with this launch file." />
-  <arg name="launch_rviz" default="true"
+  <arg name="launch_rviz" default="false"
        doc="Whether to start RViz with this launch file." />
 
   <group if="$(arg launch_pf_description)">

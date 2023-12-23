@@ -1210,7 +1210,7 @@ void TebOptimalPlanner::extractVelocity(const PoseSE2& pose1, const PoseSE2& pos
   }else{
     omega = 0;
   }
-  if (std::abs(omega) > std::abs(vx)) {
+  if (std::abs(omega) > std::abs(vx) && dyp_min_turning_radius==0) {
     vx = 0;
   }
   //横向移动限制,不能让一会90度一会-90度
