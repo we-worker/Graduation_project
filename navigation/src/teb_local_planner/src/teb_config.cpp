@@ -178,10 +178,10 @@ void TebConfig::loadRosParamFromNodeHandle(const ros::NodeHandle& nh)
   nh.param("divergence_detection", recovery.divergence_detection_enable, recovery.divergence_detection_enable);
   
   
-  nh.param("dyp_info1",optim.dyp_info1, optim.dyp_info1);
-  nh.param("dyp_info2",optim.dyp_info2, optim.dyp_info2);
-  nh.param("dyp_info3",optim.dyp_info3, optim.dyp_info3);
-  nh.param("dyp_info4",optim.dyp_info4, optim.dyp_info4);
+  nh.param("MMT_info1",optim.MMT_info1, optim.MMT_info1);
+  nh.param("MMT_info2",optim.MMT_info2, optim.MMT_info2);
+  nh.param("MMT_info3",optim.MMT_info3, optim.MMT_info3);
+  nh.param("MMT_info4",optim.MMT_info4, optim.MMT_info4);
 
 
   checkParameters();
@@ -305,10 +305,10 @@ void TebConfig::reconfigure(TebLocalPlannerReconfigureConfig& cfg)
   recovery.divergence_detection_enable = cfg.divergence_detection_enable;
   recovery.divergence_detection_max_chi_squared = cfg.divergence_detection_max_chi_squared;
 
-  optim.dyp_info1 = cfg.dyp_info1;
-  optim.dyp_info2 = cfg.dyp_info2;
-  optim.dyp_info3 = cfg.dyp_info3;
-  optim.dyp_info4 = cfg.dyp_info4;
+  optim.MMT_info1 = cfg.MMT_info1;
+  optim.MMT_info2 = cfg.MMT_info2;
+  optim.MMT_info3 = cfg.MMT_info3;
+  optim.MMT_info4 = cfg.MMT_info4;
 
 
   

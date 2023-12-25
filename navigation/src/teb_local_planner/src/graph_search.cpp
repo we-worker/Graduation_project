@@ -39,7 +39,7 @@
 #include <teb_local_planner/graph_search.h>
 #include <teb_local_planner/homotopy_class_planner.h>
 
-#include <teb_local_planner/dyp_control.h>
+#include <teb_local_planner/MMT_control.h>
 
 namespace teb_local_planner
 {
@@ -227,7 +227,7 @@ void ProbRoadmapGraph::createGraph(const PoseSE2& start, const PoseSE2& goal, do
     return;
   // 开始和目标之间的方向向量和法向量:
   PoseSE2 goal2;
-  if(dyp_min_turning_radius!=0){
+  if(MMT_min_turning_radius!=0){
     goal2=goal;
   }else{
     PoseSE2 goal22(goal.position(),start.theta());
@@ -239,7 +239,7 @@ void ProbRoadmapGraph::createGraph(const PoseSE2& start, const PoseSE2& goal, do
   if (start_goal_dist<cfg_->goal_tolerance.xy_goal_tolerance)
   {
     ROS_DEBUG("HomotopyClassPlanner::createProbRoadmapGraph():2 xy-goal-tolerance already reached.");
-    at_xy_terget = true;
+    MMT_at_xy_terget = true;
     if (hcp_->getTrajectoryContainer().empty())
     {
       ROS_INFO("HomotopyClassPlanner::createProbRoadmapGraph(): Initializing a small straight line to just correct orientation errors.");
@@ -247,7 +247,7 @@ void ProbRoadmapGraph::createGraph(const PoseSE2& start, const PoseSE2& goal, do
     }
     return;
   }else{
-    at_xy_terget = false;
+    MMT_at_xy_terget = false;
   }
   Eigen::Vector2d normal(-diff.coeffRef(1),diff.coeffRef(0)); // 法向量
   normal.normalize();

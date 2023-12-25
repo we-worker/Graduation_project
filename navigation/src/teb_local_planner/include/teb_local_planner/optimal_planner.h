@@ -663,7 +663,7 @@ protected:
   
   //@}
   
-  //TODO DYP
+  //TODO MMT
   void AddEdgesNoSimultaneousLinearAndAngularSpeed();
   void AddEdgesKinematicsFourWheeled();
   /**

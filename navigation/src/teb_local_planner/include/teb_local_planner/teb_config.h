@@ -177,10 +177,10 @@ public:
 
     double weight_adapt_factor; //!< Some special weights (currently 'weight_obstacle') are repeatedly scaled by this factor in each outer TEB iteration (weight_new = weight_old*factor); Increasing weights iteratively instead of setting a huge value a-priori leads to better numerical conditions of the underlying optimization problem.
     double obstacle_cost_exponent; //!< Exponent for nonlinear obstacle cost (cost = linear_cost * obstacle_cost_exponent). Set to 1 to disable nonlinear cost (default)
-    double dyp_info1;
-    double dyp_info2;
-    double dyp_info3;
-    double dyp_info4;
+    double MMT_info1;
+    double MMT_info2;
+    double MMT_info3;
+    double MMT_info4;
 
   } optim; //!< Optimization related parameters
 
@@ -391,10 +391,10 @@ public:
     recovery.oscillation_recovery_min_duration = 10;
     recovery.oscillation_filter_duration = 10;
 
-    optim.dyp_info1 = 1;
-    optim.dyp_info2 = 1;
-    optim.dyp_info3 = 1;
-    optim.dyp_info4 = 1;
+    optim.MMT_info1 = 1;
+    optim.MMT_info2 = 1;
+    optim.MMT_info3 = 1;
+    optim.MMT_info4 = 1;
   }
 
   /**

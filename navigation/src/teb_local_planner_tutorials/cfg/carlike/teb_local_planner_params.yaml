@@ -129,7 +129,7 @@ TebLocalPlannerROS:
   feasibility_check_lookahead_distance: 3
   # min_samples: 1
 
-  dyp_info1: 2
-  dyp_info2: 2
-  dyp_info3: 1
-  dyp_info4: 2
+  MMT_info1: 2
+  MMT_info2: 2
+  MMT_info3: 1
+  MMT_info4: 2

@@ -50,7 +50,7 @@
 #include <teb_local_planner/teb_config.h>
 
 #include <cmath>
-#include <teb_local_planner/dyp_control.h>
+#include <teb_local_planner/MMT_control.h>
 
 namespace teb_local_planner
 {
@@ -265,25 +265,17 @@ namespace teb_local_planner
       const VertexPose *conf1 = static_cast<const VertexPose *>(_vertices[0]);
       const VertexPose *conf2 = static_cast<const VertexPose *>(_vertices[1]);
       const VertexPose *conf_old = static_cast<const VertexPose *>(_vertices[2]);
-      //参考加速度部分
-      // const VertexPose* pose3 = static_cast<const VertexPose*>(_vertices[2]);
-      // const VertexTimeDiff* dt1 = static_cast<const VertexTimeDiff*>(_vertices[3]);
-      // const VertexTimeDiff* dt2 = static_cast<const VertexTimeDiff*>(_vertices[4]);
+
 
       Eigen::Vector2d deltaS = conf2->position() - conf1->position();
       Eigen::Vector2d last_deltaS = conf1->position() - conf_old->position();
       double angle_diff = g2o::normalize_theta(conf2->theta() - conf1->theta());
       double angle_diff_old = g2o::normalize_theta(conf1->theta() - conf_old->theta());
 
-      // 非全向约束
+      // 非全向约束,阿克曼转弯半径约束
       // _error[0] = fabs((cos(conf1->theta()) + cos(conf2->theta())) * deltaS[1] - (sin(conf1->theta()) + sin(conf2->theta())) * deltaS[0]);
       _error[0] =0;
-      // linear.y 变换要连续，不能突变
-      // if (fabs(deltaS[1] - last_deltaS[1]) > 0) {
-      //   _error[2] = fabs(deltaS[1] - last_deltaS[1])*fabs(deltaS[1] - last_deltaS[1]);
-      // } else {
-      //   _error[2] = 0;
-      // }
+      
 
       // 转为机器人坐标系下的角度
       double cos_theta1 = std::cos(conf1->theta());
@@ -299,12 +291,13 @@ namespace teb_local_planner
       double r_dx_old =  cos_theta_old*last_deltaS.x() + sin_theta_old*last_deltaS.y();
       double r_dy_old = -sin_theta_old*last_deltaS.x() + cos_theta_old*last_deltaS.y();
 
+      //计算上一段路的舵轮角度，和下一段路的舵轮角度      
       double angle_deltaS = calculateAngle(r_dx, r_dy,angle_diff);                           
       double angle_last_deltaS = calculateAngle(r_dx_old,r_dy_old,angle_diff_old);
       double angle_diff2 = angle_deltaS - angle_last_deltaS;
 
       // 线速度和角速度不能同时存在
-      if (fabs(r_dy) > 0 && fabs(angle_diff) > 0)
+      if (fabs(r_dy) > 0 && fabs(angle_diff2) > 0)
       {
         _error[1] = r_dy*r_dy;
       }
@@ -315,11 +308,11 @@ namespace teb_local_planner
 
 
       // 判定上一时刻如果x变化为0，而角速度存在时，此时如果角速度存在 为零，误差等于此时刻x
-      // if (angle_last_deltaS!=180 && angle_deltaS==180 )
-      if (fabs(r_dx_old) < fabs(angle_last_deltaS) && angle_last_deltaS==0 && angle_deltaS==0 )
-      // if (angle_last_deltaS!=180 && angle_deltaS==180 )
+      // 自旋状态要尽可能连续，自旋状态时，线速度为0
+      // if (fabs(r_dx_old) < fabs(angle_last_deltaS) && angle_last_deltaS==180 && angle_deltaS==180 )
+      if(angle_deltaS==180)
       {
-        _error[2] = r_dx*r_dx;
+        _error[2] = r_dx*r_dx+r_dy*r_dy;
       }
       else
       {
@@ -328,8 +321,8 @@ namespace teb_local_planner
 
       // 线速度斜移角度变化要连续
       // if (r_dx==0 && r_dy == 0 && r_dx_old== 0 && r_dy_old== 0 &&angle_diff==0 &&angle_diff_old==0)
-      if ((r_dx_old== 0 && r_dy_old== 0 && angle_diff_old==0)||(r_dx==0 && r_dy == 0 && angle_diff==0 )
-            || dyp_first_judge_Carlike==true ||at_xy_terget==true)
+      if ((r_dx_old== 0 && r_dy_old== 0 && angle_diff_old==0)||(r_dx==0 && r_dy == 0 && angle_diff2==0 )
+            || MMT_first_judge_Carlike==true ||MMT_at_xy_terget==true)
       {
         _error[3] = 0;
        }
@@ -338,39 +331,20 @@ namespace teb_local_planner
         
         // _error[3] = fabs(r_dx-r_dx_old)+fabs(r_dy-r_dy_old);//angle_diff2
           _error[3] =fabs(angle_diff2);
-        // _error[3] = fabs( r_dy/r_dx-r_dy_old/r_dx_old );//angle_diff2
-        //  _error[3] = 0;
+
         }
-      // if (angle_diff == 0)
-      //   _error[3] = 0;                            // 直线运动
-      // else
-      //   _error[3] = penaltyBoundFromBelow(deltaS.norm() / fabs(angle_diff), 810, 0.0);
+
       // 正向驱动约束
       Eigen::Vector2d angle_vec(cos(conf1->theta()), sin(conf1->theta()));
       _error[4] = penaltyBoundFromBelow(deltaS.dot(angle_vec), 0, 0);
-      // 角速度angular.z 大于linear.x 时，linear.x只能为0,需要优化
-      // if (deltaS[0]!=0 && fabs(angle_diff) > fabs(deltaS[0])) {
-      //   _error[4] = 1;//(deltaS[0]*deltaS[0])
-      // } else {
-      //   _error[4] = 0;
-      // }
+
 
       ROS_ASSERT_MSG(std::isfinite(_error[0]) && std::isfinite(_error[1]) && std::isfinite(_error[2]) && std::isfinite(_error[3]), "EdgeKinematicsFourWheeled::computeError() _error[0]=%f _error[1]=%f _error[2]=%f _error[3]=%f\n", _error[0], _error[1], _error[2], _error[3]);
       // ROS_INFO("EdgeKinematicsFourWheeled::computeError() _error[0]=%f _error[1]=%f _error[2]=%f _error[3],angle_diff2=%f\n",_error[0],_error[1],_error[2],_error[3]);
-      //变化似乎不连续
-        // ROS_INFO("conf1=%f,conf1=%f,count_111=%d\n",conf1->position()[0],conf1->position()[1], count_111);
-
       // if (_error[3] * 100 > 1)
       //  std::cout << "EdgeKinematicsFourWheeled::computeError()  angle_deltaS=" << angle_deltaS << ",angle_last=" << angle_last_deltaS << ",angle_diff2=" << _error[3] << std::endl;
-     // if (deltaS!=last_deltaS)
-      // {
-      //   /* code */
-      //   last_deltaS = deltaS;
-      // }
-      // count_111++;
       
     }
-
 
 
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW

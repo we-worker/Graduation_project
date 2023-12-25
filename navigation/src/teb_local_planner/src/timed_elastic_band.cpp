@@ -39,8 +39,8 @@
 #include <teb_local_planner/timed_elastic_band.h>
 
 #include <limits>
-#include <teb_local_planner/dyp_control.h>
-extern int dyp_no_infeasible_plans_;
+#include <teb_local_planner/MMT_control.h>
+extern int MMT_no_infeasible_plans_;
 namespace teb_local_planner
 {
 
@@ -379,7 +379,7 @@ bool TimedElasticBand::initTrajectoryToGoal(const PoseSE2& start, const PoseSE2&
           Eigen::Vector2d point_to_goal = goal.position()-BackPose().position();
           double dir_to_goal = std::atan2(point_to_goal[1],point_to_goal[0]); // 方向到目标
             PoseSE2 goal2;
-          if(dyp_min_turning_radius!=0){
+          if(MMT_min_turning_radius!=0){
             goal2=goal;
           }else{
             PoseSE2 goal22(goal.x(), goal.y(), dir_to_goal);
@@ -459,11 +459,11 @@ bool TimedElasticBand::initTrajectoryToGoal(const std::vector<geometry_msgs::Pos
 
       // 创建一个中间位姿
       PoseSE2 intermediate_pose;
-      if (dyp_no_infeasible_plans_<3 || dyp_no_infeasible_plans_>=6)//找不到路径多次
+      if (MMT_no_infeasible_plans_<3 || MMT_no_infeasible_plans_>=6)//找不到路径多次
       {
         intermediate_pose = PoseSE2(plan[i].pose.position.x, plan[i].pose.position.y, start.theta());
       }else{
-          if(dyp_min_turning_radius!=0){
+          if(MMT_min_turning_radius!=0){
             intermediate_pose = PoseSE2(plan[i].pose.position.x, plan[i].pose.position.y, yaw);
           }else{
             intermediate_pose = PoseSE2(plan[i].pose.position.x, plan[i].pose.position.y, dir_to_goal2);
@@ -488,14 +488,14 @@ bool TimedElasticBand::initTrajectoryToGoal(const std::vector<geometry_msgs::Pos
       {
         //   // 创建一个中间位姿
         // PoseSE2 goal3;
-        // if (dyp_no_infeasible_plans_<3 || dyp_no_infeasible_plans_>=6)//找不到路径多次
+        // if (MMT_no_infeasible_plans_<3 || MMT_no_infeasible_plans_>=6)//找不到路径多次
         // {
         //   goal3 = PoseSE2(goal.position(), start.theta());
         // }else{
         //   goal3 = goal;
         // }
           PoseSE2 goal2;
-          if(dyp_min_turning_radius!=0){
+          if(MMT_min_turning_radius!=0){
             goal2=goal;
           }else{
             PoseSE2 goal22(goal.x(), goal.y(), start.theta());

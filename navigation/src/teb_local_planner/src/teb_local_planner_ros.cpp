@@ -58,12 +58,12 @@
 #include "g2o/solvers/cholmod/linear_solver_cholmod.h"
 
 
-#include <teb_local_planner/dyp_control.h>
-int dyp_no_infeasible_plans_=0;
-bool at_xy_terget=false;
-double dyp_min_turning_radius=0.0;
-bool dyp_use_Carlike=true;
-bool dyp_first_judge_Carlike=true;
+#include <teb_local_planner/MMT_control.h>
+int MMT_no_infeasible_plans_=0;
+bool MMT_at_xy_terget=false;
+double MMT_min_turning_radius=0.0;
+bool MMT_use_Carlike=true;
+bool MMT_first_judge_Carlike=true;
 
 // register this planner both as a BaseLocalPlanner and as a MBF's CostmapController plugin
 PLUGINLIB_EXPORT_CLASS(teb_local_planner::TebLocalPlannerROS, nav_core::BaseLocalPlanner)
@@ -313,7 +313,7 @@ uint32_t TebLocalPlannerROS::computeVelocityCommands(const geometry_msgs::PoseSt
         || cfg_.goal_tolerance.free_goal_vel))
   {
     goal_reached_ = true;
-    dyp_first_judge_Carlike=true;
+    MMT_first_judge_Carlike=true;
     // std::cout<<"goal_reached_ = true"<<std::endl;
     return mbf_msgs::ExePathResult::SUCCESS;
   }
@@ -418,7 +418,7 @@ uint32_t TebLocalPlannerROS::computeVelocityCommands(const geometry_msgs::PoseSt
     ROS_WARN("TebLocalPlannerROS: trajectory is not feasible. Resetting planner...");
     
     ++no_infeasible_plans_; // 增加连续无法实现的解决方案的数量
-    dyp_no_infeasible_plans_++;
+    MMT_no_infeasible_plans_++;
     time_last_infeasible_plan_ = ros::Time::now();
     last_cmd_ = cmd_vel.twist;
     message = "teb_local_planner trajectory is not feasible";
@@ -458,7 +458,7 @@ uint32_t TebLocalPlannerROS::computeVelocityCommands(const geometry_msgs::PoseSt
   {
     // 将线性速度和角速度转换为转向角
     cmd_vel.twist.angular.z = convertTransRotVelToSteeringAngle(cmd_vel.twist.linear.x, cmd_vel.twist.angular.z,
-                                                                cfg_.robot.wheelbase, 0.95*dyp_min_turning_radius);
+                                                                cfg_.robot.wheelbase, 0.95*MMT_min_turning_radius);
     // 如果结果的转向角不是有限的
     if (!std::isfinite(cmd_vel.twist.angular.z))
     {
@@ -481,7 +481,7 @@ uint32_t TebLocalPlannerROS::computeVelocityCommands(const geometry_msgs::PoseSt
   
   // a feasible solution should be found, reset counter
   no_infeasible_plans_ = 0;
-  dyp_no_infeasible_plans_=0;
+  MMT_no_infeasible_plans_=0;
   
   // store last command (for recovery analysis etc.)
   last_cmd_ = cmd_vel.twist;
@@ -1015,8 +1015,8 @@ void TebLocalPlannerROS::configureBackupModes(std::vector<geometry_msgs::PoseSta
     {
         double max_vel_theta;
         double max_vel_current = last_cmd_.linear.x >= 0 ? cfg_.robot.max_vel_x : cfg_.robot.max_vel_x_backwards;
-        if (dyp_min_turning_radius!=0 && max_vel_current>0)
-            max_vel_theta = std::max( max_vel_current/std::abs(dyp_min_turning_radius),  cfg_.robot.max_vel_theta );
+        if (MMT_min_turning_radius!=0 && max_vel_current>0)
+            max_vel_theta = std::max( max_vel_current/std::abs(MMT_min_turning_radius),  cfg_.robot.max_vel_theta );
         else
             max_vel_theta = cfg_.robot.max_vel_theta;
         

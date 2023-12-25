@@ -50,8 +50,8 @@
 #include <teb_local_planner/g2o_types/edge_via_point.h>
 #include <teb_local_planner/g2o_types/edge_prefer_rotdir.h>
 
-#include <teb_local_planner/g2o_types/dyp_LinearAndAngularSpeed.h>
-#include <teb_local_planner/dyp_control.h>
+// #include <teb_local_planner/g2o_types/MMT_LinearAndAngularSpeed.h>
+#include <teb_local_planner/MMT_control.h>
 
 #include <memory>
 #include <limits>
@@ -381,40 +381,32 @@ bool TebOptimalPlanner::buildGraph(double weight_multiplier)
   if (cfg_->optim.weight_velocity_obstacle_ratio > 0)
     AddEdgesVelocityObstacleRatio(); // 添加速度障碍物比例约束
     
-  // AddEdgesNoSimultaneousLinearAndAngularSpeed();//线速度y与角速度不能同时为0
-  // AddEdgesKinematicsFourWheeled();
-    if(dyp_first_judge_Carlike){
+    // 判断是否是当前导航第一次判读，
+    // MMT_at_xy_terget考虑结合这个变量，单次导航的时候，固定只能用阿克曼或者只能用四舵轮模型。
+    if(MMT_first_judge_Carlike){
       int n = teb_.sizePoses();
       PoseSE2 goal=teb_.Pose(n-1);
-      // geometry_msgs::PoseStamped global_goal;
-      // tf2::doTransform(global_plan_.back(), global_goal, tf_plan_to_global);
-      // // double dx = global_goal.pose.position.x - robot_pose_.x();
-      //  PoseSE2 goal=global_goal.pose();
-
-
       PoseSE2 start=teb_.Pose(0);
+
       double orientdiff = g2o::normalize_theta(goal.theta() - start.theta());
       double dist=(goal.position() - start.position()).norm() ;
+      //距离小于1.5m，且角度差小于0.2rad，使用四舵轮模型
       if(dist<1.5 && orientdiff <0.2){
-        dyp_use_Carlike=false;
+        MMT_use_Carlike=false;
       }else{
-        dyp_use_Carlike=true;
+        MMT_use_Carlike=true;
       }
-      dyp_first_judge_Carlike=false;
+      MMT_first_judge_Carlike=false;
     }
 
-    if(dyp_use_Carlike){
-      dyp_min_turning_radius=0.81;
+    if(MMT_use_Carlike){
+      MMT_min_turning_radius=0.81;
       AddEdgesKinematicsCarlike(); // 添加类似汽车的机器人的运动学约束
     }else{
-      dyp_min_turning_radius=0;
+      MMT_min_turning_radius=0;
       AddEdgesKinematicsFourWheeled();
     }
-    // at_xy_terget考虑结合这个变量，单次导航的时候，固定只能用阿克曼或者只能用四舵轮模型。
 
-
-
-  // std::cout<<"buildGraph!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"<<std::endl;
   return true;  
 }
 
@@ -773,7 +765,7 @@ void TebOptimalPlanner::AddEdgesViaPoints()
 void TebOptimalPlanner::AddEdgesVelocity()
 {
   // 如果机器人的最大y方向速度为0，即为非全向机器人
-  if (cfg_->robot.max_vel_y == 0 || dyp_min_turning_radius!=0) 
+  if (cfg_->robot.max_vel_y == 0 || MMT_min_turning_radius!=0) 
   {
     // 如果x方向和角速度的权重都为0，则不添加边
     if ( cfg_->optim.weight_max_vel_x==0 && cfg_->optim.weight_max_vel_theta==0)
@@ -833,7 +825,7 @@ void TebOptimalPlanner::AddEdgesAcceleration()
 
   int n = teb_.sizePoses();  
     
-  if (cfg_->robot.max_vel_y == 0 || cfg_->robot.acc_lim_y == 0 || dyp_min_turning_radius!=0) // non-holonomic robot
+  if (cfg_->robot.max_vel_y == 0 || cfg_->robot.acc_lim_y == 0 || MMT_min_turning_radius!=0) // non-holonomic robot
   {
     Eigen::Matrix<double,2,2> information;
     information.fill(0);
@@ -1176,7 +1168,7 @@ void TebOptimalPlanner::extractVelocity(const PoseSE2& pose1, const PoseSE2& pos
   
   Eigen::Vector2d deltaS = pose2.position() - pose1.position();
   
-  if (cfg_->robot.max_vel_y == 0 || dyp_min_turning_radius!=0) // nonholonomic robot
+  if (cfg_->robot.max_vel_y == 0 || MMT_min_turning_radius!=0) // nonholonomic robot
   {
     Eigen::Vector2d conf1dir( cos(pose1.theta()), sin(pose1.theta()) );
     // translational velocity
@@ -1210,7 +1202,7 @@ void TebOptimalPlanner::extractVelocity(const PoseSE2& pose1, const PoseSE2& pos
   }else{
     omega = 0;
   }
-  if (std::abs(omega) > std::abs(vx) && dyp_min_turning_radius==0) {
+  if (std::abs(omega) > std::abs(vx) && MMT_min_turning_radius==0) {
     vx = 0;
   }
   //横向移动限制,不能让一会90度一会-90度
@@ -1220,7 +1212,7 @@ void TebOptimalPlanner::extractVelocity(const PoseSE2& pose1, const PoseSE2& pos
       vx=vx_last;
     }
   }
-  if(at_xy_terget){
+  if(MMT_at_xy_terget){
     vx = 0;vy = 0;
     int n = teb_.sizePoses();
     PoseSE2 goal=teb_.Pose(n-1);
@@ -1428,23 +1420,23 @@ bool TebOptimalPlanner::isTrajectoryFeasible(base_local_planner::CostmapModel* c
 }
 
 
-void TebOptimalPlanner::AddEdgesNoSimultaneousLinearAndAngularSpeed()
-{
-  // create edge for satisfying the constraint that linear and angular speed should not exist at the same time
-  Eigen::Matrix<double,1,1> information_no_simultaneous_speed;
-  // information_no_simultaneous_speed.fill(cfg_->optim.weight_no_simultaneous_speed);
-  information_no_simultaneous_speed.fill(0);
+// void TebOptimalPlanner::AddEdgesNoSimultaneousLinearAndAngularSpeed()
+// {
+//   // create edge for satisfying the constraint that linear and angular speed should not exist at the same time
+//   Eigen::Matrix<double,1,1> information_no_simultaneous_speed;
+//   // information_no_simultaneous_speed.fill(cfg_->optim.weight_no_simultaneous_speed);
+//   information_no_simultaneous_speed.fill(0);
 
-  for (int i=0; i < teb_.sizePoses()-1; ++i) // apply to all rotations
-  {
-    EdgeNoSimultaneousLinearAndAngularSpeed* no_simultaneous_speed_edge = new EdgeNoSimultaneousLinearAndAngularSpeed;
-    no_simultaneous_speed_edge->setVertex(0,teb_.PoseVertex(i));
-    no_simultaneous_speed_edge->setVertex(1,teb_.PoseVertex(i+1));      
-    no_simultaneous_speed_edge->setInformation(information_no_simultaneous_speed);
+//   for (int i=0; i < teb_.sizePoses()-1; ++i) // apply to all rotations
+//   {
+//     EdgeNoSimultaneousLinearAndAngularSpeed* no_simultaneous_speed_edge = new EdgeNoSimultaneousLinearAndAngularSpeed;
+//     no_simultaneous_speed_edge->setVertex(0,teb_.PoseVertex(i));
+//     no_simultaneous_speed_edge->setVertex(1,teb_.PoseVertex(i+1));      
+//     no_simultaneous_speed_edge->setInformation(information_no_simultaneous_speed);
     
-    optimizer_->addEdge(no_simultaneous_speed_edge);
-  }
-}
+//     optimizer_->addEdge(no_simultaneous_speed_edge);
+//   }
+// }
 
 
 void TebOptimalPlanner::AddEdgesKinematicsFourWheeled()
@@ -1456,10 +1448,10 @@ void TebOptimalPlanner::AddEdgesKinematicsFourWheeled()
   Eigen::Matrix<double,5,5> information_kinematics;
   information_kinematics.fill(0);
   information_kinematics(0, 0) = cfg_->optim.weight_kinematics_nh;
-  information_kinematics(1, 1) = cfg_->optim.dyp_info1;
-  information_kinematics(2, 2) = cfg_->optim.dyp_info2;
-  information_kinematics(3, 3) = cfg_->optim.dyp_info3;
-  information_kinematics(4, 4) = cfg_->optim.dyp_info4;
+  information_kinematics(1, 1) = cfg_->optim.MMT_info1;
+  information_kinematics(2, 2) = cfg_->optim.MMT_info2;
+  information_kinematics(3, 3) = cfg_->optim.MMT_info3;
+  information_kinematics(4, 4) = cfg_->optim.MMT_info4;
   
   for (int i=0; i < teb_.sizePoses()-1; i++) // ignore twiced start only
   {
