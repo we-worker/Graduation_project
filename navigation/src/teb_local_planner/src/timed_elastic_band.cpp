@@ -393,16 +393,16 @@ bool TimedElasticBand::initTrajectoryToGoal(const PoseSE2& start, const PoseSE2&
     }
     
     //TODO 目标位置不带方向
-    // 添加目标
+    PoseSE2 goal2;
+    if(MMT_min_turning_radius!=0){
+      goal2=goal;
+    }else{
+      goal2=PoseSE2(goal.position(), start.theta());;
+    }
+
     if (max_vel_x > 0) timestep = (goal.position()-BackPose().position()).norm()/max_vel_x;
-    addPoseAndTimeDiff(goal,timestep); // 添加目标点
+    addPoseAndTimeDiff(goal2,timestep); // 添加目标点
     setPoseVertexFixed(sizePoses()-1,true); // 在优化过程中，GoalConf是一个固定的约束	
-    // // 添加目标
-    // if (max_vel_x > 0) timestep = (goal.position()-BackPose().position()).norm()/max_vel_x;
-    // // 使用当前路径的最后一个点的方向作为目标点的方向
-    // PoseSE2 goal_without_orientation(goal.x(), goal.y(), BackPose().theta());
-    // addPoseAndTimeDiff(goal_without_orientation, timestep); // 添加目标点
-    // setPoseVertexFixed(sizePoses()-1,true); // 在优化过程中，GoalConf是一个固定的约束
   }
   else // size!=0
   {
@@ -479,7 +479,7 @@ bool TimedElasticBand::initTrajectoryToGoal(const std::vector<geometry_msgs::Pos
     }
     
 
-    // PoseSE2 goal3(BackPose().x(), BackPose().y(), goal.theta);
+
     // if number of samples is not larger than min_samples, insert manually
     if ( sizePoses() < min_samples-1 )
     {
@@ -487,13 +487,6 @@ bool TimedElasticBand::initTrajectoryToGoal(const std::vector<geometry_msgs::Pos
       while (sizePoses() < min_samples-1) // subtract goal point that will be added later
       {
         //   // 创建一个中间位姿
-        // PoseSE2 goal3;
-        // if (MMT_no_infeasible_plans_<3 || MMT_no_infeasible_plans_>=6)//找不到路径多次
-        // {
-        //   goal3 = PoseSE2(goal.position(), start.theta());
-        // }else{
-        //   goal3 = goal;
-        // }
           PoseSE2 goal2;
           if(MMT_min_turning_radius!=0){
             goal2=goal;
@@ -510,7 +503,12 @@ bool TimedElasticBand::initTrajectoryToGoal(const std::vector<geometry_msgs::Pos
     }
     
     // Now add final state with given orientation
-    PoseSE2 goal2 = PoseSE2(goal.position(), start.theta());
+    // PoseSE2 goal2;
+    // if(MMT_min_turning_radius!=0){
+    //   goal2=goal;
+    // }else{
+    //   goal2=PoseSE2(goal.position(), start.theta());;
+    // }
     double dt = estimateDeltaT(BackPose(), goal, max_vel_x, max_vel_theta);
     addPoseAndTimeDiff(goal, dt);
     setPoseVertexFixed(sizePoses()-1,true); // GoalConf is a fixed constraint during optimization
@@ -634,8 +632,8 @@ void TimedElasticBand::updateAndPruneTEB(boost::optional<const PoseSE2&> new_sta
   {    
     // 找到最近的状态（使用l2-范数）以便修剪轨迹
     // （删除已经通过的状态）
-    double dist_cache = (new_start->position()- Pose(0).position()).norm();
-    // double dist_cache = 0.15;
+    // double dist_cache = (new_start->position()- Pose(0).position()).norm();
+    double dist_cache = 0.07; //7cm
     double dist;
     int lookahead = std::min<int>( sizePoses()-min_samples, 10); // 满足min_samples，否则最多10个样本
 
@@ -658,7 +656,7 @@ void TimedElasticBand::updateAndPruneTEB(boost::optional<const PoseSE2&> new_sta
       // 警告从pose 1开始删除，并用new_start覆盖原始pose(0)，因为Pose(0)在优化过程中是固定的！
       deletePoses(1, nearest_idx);  // 删除第一个状态，使最近的状态成为新的第一个状态
       deleteTimeDiffs(1, nearest_idx); // 删除相应的时间差
-      std::cout << "deletePoses(1, nearest_idx);" << std::endl;
+      std::cout << "deletePoses(1, nearest_idx);dist_cache:" <<  dist_cache<< std::endl;
     }
     
     // 更新开始

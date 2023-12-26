@@ -79,7 +79,7 @@ TebLocalPlannerROS:
   weight_acc_lim_x: 1 #线加速度权重
   weight_acc_lim_y: 1
   weight_acc_lim_theta: 1 #角加速度权重
-  weight_kinematics_nh: 1000 #非全向机器人权重
+  weight_kinematics_nh: 100 #非全向机器人权重
   weight_kinematics_forward_drive: 1000 #前向驱动权重
   weight_kinematics_turning_radius: 1 #转弯半径权重
   weight_optimaltime: 1 #时间最优权重，必须大于0
@@ -129,7 +129,7 @@ TebLocalPlannerROS:
   feasibility_check_lookahead_distance: 3
   # min_samples: 1
 
-  MMT_info1: 2
-  MMT_info2: 2
+  MMT_info1: 1
+  MMT_info2: 1
   MMT_info3: 1
-  MMT_info4: 2
+  MMT_info4: 1

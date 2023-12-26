@@ -1420,24 +1420,6 @@ bool TebOptimalPlanner::isTrajectoryFeasible(base_local_planner::CostmapModel* c
 }
 
 
-// void TebOptimalPlanner::AddEdgesNoSimultaneousLinearAndAngularSpeed()
-// {
-//   // create edge for satisfying the constraint that linear and angular speed should not exist at the same time
-//   Eigen::Matrix<double,1,1> information_no_simultaneous_speed;
-//   // information_no_simultaneous_speed.fill(cfg_->optim.weight_no_simultaneous_speed);
-//   information_no_simultaneous_speed.fill(0);
-
-//   for (int i=0; i < teb_.sizePoses()-1; ++i) // apply to all rotations
-//   {
-//     EdgeNoSimultaneousLinearAndAngularSpeed* no_simultaneous_speed_edge = new EdgeNoSimultaneousLinearAndAngularSpeed;
-//     no_simultaneous_speed_edge->setVertex(0,teb_.PoseVertex(i));
-//     no_simultaneous_speed_edge->setVertex(1,teb_.PoseVertex(i+1));      
-//     no_simultaneous_speed_edge->setInformation(information_no_simultaneous_speed);
-    
-//     optimizer_->addEdge(no_simultaneous_speed_edge);
-//   }
-// }
-
 
 void TebOptimalPlanner::AddEdgesKinematicsFourWheeled()
 {
@@ -1453,22 +1435,60 @@ void TebOptimalPlanner::AddEdgesKinematicsFourWheeled()
   information_kinematics(3, 3) = cfg_->optim.MMT_info3;
   information_kinematics(4, 4) = cfg_->optim.MMT_info4;
   
-  for (int i=0; i < teb_.sizePoses()-1; i++) // ignore twiced start only
-  {
-    EdgeKinematicsFourWheeled* kinematics_edge = new EdgeKinematicsFourWheeled;
-    kinematics_edge->setVertex(0,teb_.PoseVertex(i));
-    kinematics_edge->setVertex(1,teb_.PoseVertex(i+1));
-    if (i!=0)
-    {
-      kinematics_edge->setVertex(2,teb_.PoseVertex(i-1));      
-    }else{
-      kinematics_edge->setVertex(2,teb_.PoseVertex(i)); 
-    }
+    int n = teb_.sizePoses(); 
+    // if (vel_start_.first)
+    // {
+    //   EdgeKinematicsFourWheeled* kinematics_edge = new EdgeKinematicsFourWheeled;
+    //   kinematics_edge->setVertex(0,teb_.PoseVertex(0));
+    //   kinematics_edge->setVertex(1,teb_.PoseVertex(1));
+    //   kinematics_edge->setVertex(2,teb_.TimeDiffVertex(0));
+    //   acceleration_edge->setInitialVelocity(vel_start_.second);
+    //   acceleration_edge->setInformation(information_kinematics);
+    //   acceleration_edge->setTebConfig(*cfg_);
+    //   optimizer_->addEdge(kinematics_edge);
+    // }
+    // now add the usual acceleration edge for each tuple of three teb poses
+    // if (vel_goal_.first || vel_start_.first){
+
+    // }
+      for (int i=0; i < n - 2; ++i)
+      {
+        EdgeKinematicsFourWheeled* kinematics_edge = new EdgeKinematicsFourWheeled;
+        kinematics_edge->setVertex(0,teb_.PoseVertex(i));
+        kinematics_edge->setVertex(1,teb_.PoseVertex(i+1));
+        kinematics_edge->setVertex(2,teb_.PoseVertex(i+2));
+        kinematics_edge->setVertex(3,teb_.TimeDiffVertex(i));
+        kinematics_edge->setVertex(4,teb_.TimeDiffVertex(i+1));
+        kinematics_edge->setInformation(information_kinematics);
+        kinematics_edge->setTebConfig(*cfg_);
+        optimizer_->addEdge(kinematics_edge);
+      }
+
+
     
-    kinematics_edge->setInformation(information_kinematics);
-    kinematics_edge->setTebConfig(*cfg_);
-    optimizer_->addEdge(kinematics_edge);
-  }  
+    // check if a goal velocity should be taken into accound
+
+
+  // int num=teb_.sizePoses()-1;
+  // for (int i=0; i < num; i++) // ignore twiced start only
+  // {
+  //   EdgeKinematicsFourWheeled* kinematics_edge = new EdgeKinematicsFourWheeled;
+  //   kinematics_edge->setVertex(0,teb_.PoseVertex(i));
+  //   kinematics_edge->setVertex(1,teb_.PoseVertex(i+1));
+  //   kinematics_edge->setVertex(3,teb_.TimeDiffVertex(i));
+  //   if (i!=0)
+  //   {
+  //     kinematics_edge->setVertex(2,teb_.PoseVertex(i-1));      
+  //     kinematics_edge->setVertex(4,teb_.TimeDiffVertex(i-1));
+  //   }else{
+  //     kinematics_edge->setVertex(2,teb_.PoseVertex(i)); 
+  //     kinematics_edge->setVertex(4,teb_.TimeDiffVertex(i));
+  //   }
+    
+  //   kinematics_edge->setInformation(information_kinematics);
+  //   kinematics_edge->setTebConfig(*cfg_);
+  //   optimizer_->addEdge(kinematics_edge);
+  // }  
 }
 
 } // namespace teb_local_planner
