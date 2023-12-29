@@ -45,8 +45,8 @@ TebLocalPlannerROS:
 
  # GoalTolerance
       
-  xy_goal_tolerance: 0.05
-  yaw_goal_tolerance: 0.02
+  xy_goal_tolerance: 0.1
+  yaw_goal_tolerance: 0.08
   free_goal_vel: True
   complete_global_plan: False #是否完成全局路径
       

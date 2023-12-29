@@ -335,6 +335,21 @@ bool TebOptimalPlanner::plan(const PoseSE2& start, const PoseSE2& goal, const ge
   return optimizeTEB(cfg_->optim.no_inner_iterations, cfg_->optim.no_outer_iterations); // 返回优化结果
 }
 
+
+
+  double calculateAngle(double vx, double vy) {
+    double angle = std::atan2(vy, vx) * 180 / M_PI;
+    if (angle > 90) {
+      angle -= 180;
+    }
+    if (angle < -90) {
+      angle += 180;
+    }
+    return angle;
+  }
+  double vx_last,vy_last = 0;
+
+
 bool TebOptimalPlanner::buildGraph(double weight_multiplier)
 {
   if (!optimizer_->edges().empty() || !optimizer_->vertices().empty())
@@ -390,8 +405,12 @@ bool TebOptimalPlanner::buildGraph(double weight_multiplier)
 
       double orientdiff = g2o::normalize_theta(goal.theta() - start.theta());
       double dist=(goal.position() - start.position()).norm() ;
+      Eigen::Vector2d deltaS = goal.position() - start.position();
       //距离小于1.5m，且角度差小于0.2rad，使用四舵轮模型
+      // if((fabs(calculateAngle(vx_last,vy_last)-calculateAngle(deltaS.x(),deltaS.y()))<10
+      // || (vy_last==0 && vx_last==0) || (deltaS.x()==0 && deltaS.y()==0) )  ){
       if(dist<1.5 && orientdiff <0.2){
+        
         MMT_use_Carlike=false;
       }else{
         MMT_use_Carlike=true;
@@ -1143,18 +1162,6 @@ void TebOptimalPlanner::computeCurrentCost(double obst_cost_scale, double viapoi
     clearGraph();
 }
 
-
-  double calculateAngle(double vx, double vy) {
-    double angle = std::atan2(vy, vx) * 180 / M_PI;
-    if (angle > 90) {
-      angle -= 180;
-    }
-    if (angle < -90) {
-      angle += 180;
-    }
-    return angle;
-  }
-  double vx_last,vy_last = 0;
 
 void TebOptimalPlanner::extractVelocity(const PoseSE2& pose1, const PoseSE2& pose2, double dt, double& vx, double& vy, double& omega) const
 {
